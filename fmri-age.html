@@ -60,15 +60,102 @@
     <img src="/assets/img/fmri_age_residuals_vs_pred_portfolio.png" alt="Residuals vs Predicted Plot" />
 
     <h3>Pipeline Overview</h3>
-    <p>
-      The model pipeline consists of:
-      <ol>
-        <li>Loading and flattening fMRI functional connectivity matrices (Schaefer2018 200-ROI atlas).</li>
-        <li>Scaling and reducing dimensions using PCA (n_components=100).</li>
-        <li>Training a Ridge regression model with cross-validation to predict age.</li>
-        <li>Evaluating on a held-out validation set to avoid data leakage.</li>
-      </ol>
-    </p>
+    <h3>Pipeline Overview</h3>
+
+<div style="margin: 18px 0;">
+  <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+    <div style="width: 26px; height: 26px; border-radius: 999px; background:#38bdf8; color:#020617; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+      1
+    </div>
+    <div>
+      <strong>Load & Flatten fMRI Connectivity</strong>
+      <p style="margin:4px 0 0; color:#9ca3af; font-size:0.9rem;">
+        Each subject has a 200×200 functional connectivity matrix (Schaefer2018 atlas).
+        I extract the upper triangle of this matrix into a 19,900-dimensional feature vector.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+    <div style="width: 26px; height: 26px; border-radius: 999px; background:#38bdf8; color:#020617; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+      2
+    </div>
+    <div>
+      <strong>Merge with Metadata</strong>
+      <p style="margin:4px 0 0; color:#9ca3af; font-size:0.9rem;">
+        I join these brain features with participant metadata and use age as the regression target.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+    <div style="width: 26px; height: 26px; border-radius: 999px; background:#38bdf8; color:#020617; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+      3
+    </div>
+    <div>
+      <strong>Scale + PCA</strong>
+      <p style="margin:4px 0 0; color:#9ca3af; font-size:0.9rem;">
+        I standardize the features and apply PCA to reduce 19,900 dimensions down to 100 principal components,
+        keeping most of the variance while reducing noise and overfitting.
+      </p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 14px;">
+    <div style="width: 26px; height: 26px; border-radius: 999px; background:#38bdf8; color:#020617; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+      4
+    </div>
+    <div>
+      <strong>Ridge Regression + Evaluation</strong>
+      <p style="margin:4px 0 0; color:#9ca3af; font-size:0.9rem;">
+        A Ridge regression model is trained on the PCA components with a held-out validation split.
+        Performance is measured using R², RMSE, and MAE on unseen data.
+      </p>
+    </div>
+  </div>
+</div>
+    <h3>Code Excerpt (Python)</h3>
+<p style="color:#9ca3af; font-size:0.9rem;">
+  Below is a simplified version of the core training loop: loading connectivity matrices,
+  reducing dimensionality, and fitting a Ridge regression model.
+</p>
+
+<div style="background:#020617; border:1px solid #1f2937; border-radius:10px; padding:14px; margin-top:10px; overflow-x:auto; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:0.8rem;">
+<pre><code>import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import Ridge
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
+# X: flattened connectivity features, y: participant age
+X_train, X_val, y_train, y_val = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Scale features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_val_scaled = scaler.transform(X_val)
+
+# PCA for dimensionality reduction
+pca = PCA(n_components=100, random_state=42)
+X_train_pca = pca.fit_transform(X_train_scaled)
+X_val_pca = pca.transform(X_val_scaled)
+
+# Ridge regression model
+model = Ridge(alpha=1.0, random_state=42)
+model.fit(X_train_pca, y_train)
+
+# Evaluation
+y_pred = model.predict(X_val_pca)
+r2 = r2_score(y_val, y_pred)
+rmse = mean_squared_error(y_val, y_pred, squared=False)
+mae = mean_absolute_error(y_val, y_pred)
+
+print("R²:", r2, "RMSE:", rmse, "MAE:", mae)</code></pre>
+</div>
 
     <p>
       The code for this project is available on
