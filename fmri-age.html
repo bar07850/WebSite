@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>fMRI Age Prediction | John Barandica</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" /> <!-- optional if you split your CSS -->
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at top, #111827, #020617 55%);
+      color: #e5e7eb;
+      margin: 0;
+      padding: 40px;
+      line-height: 1.6;
+    }
+    a { color: #38bdf8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin: 16px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .metrics {
+      background: rgba(15,23,42,0.7);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" style="color:#9ca3af;">← Back to Home</a>
+    <h1>fMRI Age Prediction Pipeline</h1>
+    <p>
+      This project predicts participant age from resting-state fMRI connectivity data.
+      The pipeline includes preprocessing, PCA-based dimensionality reduction, and Ridge regression modeling.
+    </p>
+
+    <div class="metrics">
+      <h3>Model Performance</h3>
+      <ul>
+        <li>R² Score: <strong>0.56</strong></li>
+        <li>RMSE: <strong>2.09 years</strong></li>
+        <li>MAE: <strong>1.65 years</strong></li>
+      </ul>
+    </div>
+
+    <h3>Visual Results</h3>
+    <p>Below are plots from the trained model, showing predicted vs actual ages and residual analysis.</p>
+
+    <img src="assets/img/fmri_age_true_vs_pred_portfolio.png" alt="True vs Predicted Age Plot" />
+    <img src="assets/img/fmri_age_residuals_hist_portfolio.png" alt="Residual Distribution Plot" />
+    <img src="assets/img/fmri_age_residuals_vs_pred_portfolio.png" alt="Residuals vs Predicted Plot" />
+
+    <h3>Pipeline Overview</h3>
+    <p>
+      The model pipeline consists of:
+      <ol>
+        <li>Loading and flattening fMRI functional connectivity matrices (Schaefer2018 200-ROI atlas).</li>
+        <li>Scaling and reducing dimensions using PCA (n_components=100).</li>
+        <li>Training a Ridge regression model with cross-validation to predict age.</li>
+        <li>Evaluating on a held-out validation set to avoid data leakage.</li>
+      </ol>
+    </p>
+
+    <p>
+      The code for this project is available on
+      <a href="https://github.com/bar07850" target="_blank">GitHub</a>.
+    </p>
+
+    <footer style="margin-top:40px; font-size:0.85rem; color:#9ca3af;">
+      &copy; <span id="year"></span> John Barandica
+    </footer>
+  </div>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
