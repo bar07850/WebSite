@@ -3,1689 +3,1144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Analyze My Dataset | John Barandica</title>
-
-    <meta
-        name="description"
-        content="Upload a dataset and inspect its structure, data quality, missing values, duplicates, and analytical potential."
-    >
+    <meta name="description" content="Upload a dataset and automatically inspect data quality, descriptive statistics, correlations, outliers, and variable distributions.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
     <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; }
         body {
-            font-family: "Inter", sans-serif;
-            background: #07111f;
-            color: white;
-            line-height: 1.6;
+            font-family:"Inter",sans-serif;
+            background:#07111f;
+            color:#fff;
+            line-height:1.6;
         }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        button,
-        input {
-            font-family: inherit;
-        }
-
-        .container {
-            width: min(1180px, 92%);
-            margin: auto;
-        }
-
-
-        /* =========================
-           NAVIGATION
-        ========================== */
+        a { color:inherit; text-decoration:none; }
+        button,input,select { font:inherit; }
+        .container { width:min(1180px,92%); margin:auto; }
 
         header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(7, 17, 31, 0.92);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            position:sticky; top:0; z-index:1000;
+            background:rgba(7,17,31,.92);
+            backdrop-filter:blur(14px);
+            border-bottom:1px solid rgba(255,255,255,.08);
         }
-
         nav {
-            min-height: 76px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            min-height:76px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
         }
+        .logo { font-size:20px; font-weight:800; }
+        .logo span { color:#47b8ff; }
+        .nav-links { display:flex; align-items:center; gap:25px; }
+        .nav-links a { color:#c5d0dc; font-size:14px; }
+        .nav-links a:hover { color:#fff; }
 
-        .logo {
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-        .logo span {
-            color: #47b8ff;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        .nav-links a {
-            color: #c5d0dc;
-            font-size: 14px;
-        }
-
-        .nav-links a:hover {
-            color: white;
-        }
-
-
-        /* =========================
-           PAGE HEADER
-        ========================== */
-
-        .page-header {
-            padding: 90px 0 55px;
-        }
-
+        .page-header { padding:90px 0 55px; }
         .eyebrow {
-            color: #47b8ff;
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 12px;
+            color:#47b8ff; font-size:13px; font-weight:700;
+            text-transform:uppercase; letter-spacing:2px; margin-bottom:12px;
         }
-
         h1 {
-            font-size: clamp(42px, 6vw, 70px);
-            letter-spacing: -3px;
-            line-height: 1.05;
-            margin-bottom: 20px;
+            font-size:clamp(42px,6vw,70px);
+            letter-spacing:-3px; line-height:1.05; margin-bottom:20px;
         }
-
-        .page-header p {
-            max-width: 750px;
-            color: #9faec0;
-            font-size: 18px;
+        .page-header > .container > p {
+            max-width:780px; color:#9faec0; font-size:18px;
         }
-
-
-        /* =========================
-           UPLOAD
-        ========================== */
 
         .upload-area {
-            margin-top: 42px;
-            border: 2px dashed rgba(71,184,255,0.35);
-            border-radius: 18px;
-            background: #0a1625;
-            padding: 60px 25px;
-            text-align: center;
-            transition: 0.2s;
+            margin-top:42px;
+            border:2px dashed rgba(71,184,255,.35);
+            border-radius:18px;
+            background:#0a1625;
+            padding:60px 25px;
+            text-align:center;
+            transition:.2s;
         }
-
         .upload-area.dragover {
-            background: rgba(71,184,255,0.08);
-            border-color: #47b8ff;
+            background:rgba(71,184,255,.08);
+            border-color:#47b8ff;
         }
-
         .upload-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 16px;
-            background: rgba(71,184,255,0.12);
-            font-size: 30px;
+            width:64px; height:64px; margin:0 auto 20px;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:16px; background:rgba(71,184,255,.12);
+            font-size:30px;
         }
-
-        .upload-area h2 {
-            margin-bottom: 10px;
-            font-size: 25px;
+        .upload-area h2 { margin-bottom:10px; font-size:25px; }
+        .upload-area p { color:#8fa0b4; margin-bottom:25px; }
+        #fileInput { display:none; }
+        .upload-button,.primary-button {
+            display:inline-block; padding:14px 22px;
+            border-radius:8px; border:0;
+            background:#47b8ff; color:#07111f;
+            font-weight:700; cursor:pointer; transition:.2s;
         }
-
-        .upload-area p {
-            color: #8fa0b4;
-            margin-bottom: 25px;
-        }
-
-        #fileInput {
-            display: none;
-        }
-
-        .upload-button {
-            display: inline-block;
-            padding: 14px 22px;
-            border-radius: 8px;
-            background: #47b8ff;
-            color: #07111f;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .upload-button:hover {
-            transform: translateY(-2px);
-        }
-
+        .upload-button:hover,.primary-button:hover { transform:translateY(-2px); }
         .file-note {
-            display: block;
-            margin-top: 18px;
-            color: #687b91;
-            font-size: 12px;
+            display:block; margin-top:18px;
+            color:#687b91; font-size:12px;
+        }
+        #errorMessage {
+            display:none; margin-top:20px; padding:15px 18px;
+            border-radius:8px; background:rgba(239,68,68,.08);
+            border:1px solid rgba(239,68,68,.3); color:#fca5a5;
         }
 
-
-        /* =========================
-           DATASET STATUS
-        ========================== */
-
-        #results {
-            display: none;
-            padding-bottom: 100px;
-        }
-
+        #results { display:none; padding-bottom:100px; }
         .dataset-header {
-            margin-top: 45px;
-            display: flex;
-            justify-content: space-between;
-            gap: 30px;
-            align-items: center;
-            flex-wrap: wrap;
+            margin-top:45px; display:flex; justify-content:space-between;
+            gap:30px; align-items:center; flex-wrap:wrap;
         }
-
-        .dataset-title h2 {
-            font-size: 30px;
-            margin-bottom: 5px;
-        }
-
-        .dataset-title p {
-            color: #8395aa;
-        }
-
+        .dataset-title h2 { font-size:30px; margin-bottom:5px; }
+        .dataset-title p { color:#8395aa; }
         .reset-button {
-            background: transparent;
-            color: #d6e0ea;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 8px;
-            padding: 11px 17px;
-            cursor: pointer;
+            background:transparent; color:#d6e0ea;
+            border:1px solid rgba(255,255,255,.15);
+            border-radius:8px; padding:11px 17px; cursor:pointer;
         }
-
-
-        /* =========================
-           METRICS
-        ========================== */
 
         .metrics-grid {
-            margin-top: 28px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            margin-top:28px; display:grid;
+            grid-template-columns:repeat(4,1fr); gap:16px;
         }
-
-        .metric-card {
-            background: #0d1b2b;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
-            padding: 22px;
+        .metric-card,.quality-card,.column-card,.stat-card,.insight-card,.chart-panel {
+            background:#0d1b2b;
+            border:1px solid rgba(255,255,255,.07);
+            border-radius:12px;
         }
-
+        .metric-card { padding:22px; }
         .metric-card span {
-            display: block;
-            color: #8294a9;
-            font-size: 13px;
-            margin-bottom: 8px;
+            display:block; color:#8294a9; font-size:13px; margin-bottom:8px;
         }
+        .metric-card strong { font-size:28px; }
+        .good { color:#4ade80; }
+        .warning { color:#fbbf24; }
 
-        .metric-card strong {
-            font-size: 28px;
-        }
-
-        .good {
-            color: #4ade80;
-        }
-
-        .warning {
-            color: #fbbf24;
-        }
-
-
-        /* =========================
-           SECTIONS
-        ========================== */
-
-        .analysis-section {
-            margin-top: 60px;
-        }
-
-        .section-title {
-            font-size: 27px;
-            margin-bottom: 8px;
-        }
-
-        .section-description {
-            color: #8497ac;
-            margin-bottom: 24px;
-        }
-
-
-        /* =========================
-           DATA QUALITY
-        ========================== */
+        .analysis-section { margin-top:60px; }
+        .section-title { font-size:27px; margin-bottom:8px; }
+        .section-description { color:#8497ac; margin-bottom:24px; }
 
         .quality-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
         }
+        .quality-card { padding:22px; }
+        .quality-label { color:#8294aa; font-size:13px; margin-bottom:8px; }
+        .quality-value { font-size:24px; font-weight:700; }
 
-        .quality-card {
-            background: #0d1b2b;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
-            padding: 22px;
+        .insight-list {
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:14px;
         }
-
-        .quality-label {
-            color: #8294aa;
-            font-size: 13px;
-            margin-bottom: 8px;
-        }
-
-        .quality-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-
-        /* =========================
-           COLUMN ANALYSIS
-        ========================== */
+        .insight-card { padding:18px 20px; }
+        .insight-card strong { display:block; margin-bottom:6px; }
+        .insight-card p { color:#91a4b9; font-size:14px; }
 
         .column-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
+            display:grid; grid-template-columns:repeat(2,1fr); gap:14px;
         }
-
-        .column-card {
-            background: #0d1b2b;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-            padding: 18px;
-        }
-
+        .column-card { padding:18px; }
         .column-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
+            display:flex; justify-content:space-between;
+            align-items:center; gap:20px;
         }
-
-        .column-name {
-            font-weight: 700;
-            word-break: break-word;
-        }
-
+        .column-name { font-weight:700; word-break:break-word; }
         .column-type {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #47b8ff;
-            white-space: nowrap;
+            font-size:11px; text-transform:uppercase; letter-spacing:1px;
+            color:#47b8ff; white-space:nowrap;
         }
+        .column-details { margin-top:10px; font-size:13px; color:#8fa1b6; }
 
-        .column-details {
-            margin-top: 10px;
-            font-size: 13px;
-            color: #8fa1b6;
+        .stats-grid {
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:14px;
         }
+        .stat-card { padding:20px; }
+        .stat-card h3 { font-size:17px; margin-bottom:14px; color:#fff; }
+        .stat-row {
+            display:flex; justify-content:space-between;
+            gap:14px; padding:6px 0;
+            color:#92a5b9; font-size:13px;
+            border-bottom:1px solid rgba(255,255,255,.05);
+        }
+        .stat-row:last-child { border-bottom:0; }
+        .stat-row strong { color:#dce6f0; font-weight:600; }
 
+        .chart-grid {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+        }
+        .chart-panel { padding:22px; min-width:0; }
+        .chart-panel h3 { margin-bottom:14px; }
+        .chart-controls {
+            display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px;
+        }
+        select {
+            width:100%;
+            max-width:320px;
+            background:#091624;
+            color:#d7e3ee;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:8px;
+            padding:10px 12px;
+        }
+        .canvas-wrap { position:relative; min-height:320px; }
+        canvas { max-width:100%; }
 
-        /* =========================
-           TABLE
-        ========================== */
+        .correlation-table td.value {
+            text-align:right;
+            font-variant-numeric:tabular-nums;
+        }
+        .corr-strong { color:#4ade80; font-weight:700; }
+        .corr-medium { color:#fbbf24; font-weight:700; }
 
         .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
+            width:100%; overflow-x:auto;
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:12px;
         }
-
         table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 750px;
-            background: #0d1b2b;
+            width:100%; border-collapse:collapse;
+            min-width:750px; background:#0d1b2b;
         }
-
-        th,
-        td {
-            padding: 13px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            text-align: left;
-            font-size: 13px;
-            white-space: nowrap;
+        th,td {
+            padding:13px 15px;
+            border-bottom:1px solid rgba(255,255,255,.06);
+            text-align:left; font-size:13px; white-space:nowrap;
         }
-
-        th {
-            color: #47b8ff;
-            font-weight: 700;
-            background: #0a1726;
-        }
-
-        td {
-            color: #c2cedb;
-        }
-
-
-        /* =========================
-           NEXT STEPS
-        ========================== */
+        th { color:#47b8ff; font-weight:700; background:#0a1726; }
+        td { color:#c2cedb; }
 
         .next-step {
-            margin-top: 60px;
-            padding: 30px;
-            border-radius: 14px;
-            background: rgba(71,184,255,0.08);
-            border: 1px solid rgba(71,184,255,0.2);
+            margin-top:60px; padding:30px; border-radius:14px;
+            background:rgba(71,184,255,.08);
+            border:1px solid rgba(71,184,255,.2);
         }
-
-        .next-step h3 {
-            margin-bottom: 10px;
-        }
-
-        .next-step p {
-            color: #9cafc1;
-        }
-
-
-        /* =========================
-           ERROR
-        ========================== */
-
-        #errorMessage {
-            display: none;
-            margin-top: 20px;
-            padding: 15px 18px;
-            border-radius: 8px;
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.3);
-            color: #fca5a5;
-        }
-
-
-        /* =========================
-           FOOTER
-        ========================== */
+        .next-step h3 { margin-bottom:10px; }
+        .next-step p { color:#9cafc1; }
 
         footer {
-            border-top: 1px solid rgba(255,255,255,0.08);
-            padding: 32px 0;
-            color: #718398;
-            font-size: 13px;
+            border-top:1px solid rgba(255,255,255,.08);
+            padding:32px 0; color:#718398; font-size:13px;
         }
 
-
-        /* =========================
-           RESPONSIVE
-        ========================== */
-
-        @media (max-width: 900px) {
-
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .quality-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .column-grid {
-                grid-template-columns: 1fr;
-            }
-
+        @media (max-width:900px) {
+            .metrics-grid,.quality-grid { grid-template-columns:repeat(2,1fr); }
+            .column-grid,.insight-list,.chart-grid,.stats-grid { grid-template-columns:1fr; }
         }
-
-        @media (max-width: 600px) {
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav-links a:not(:last-child) {
-                display: none;
-            }
-
-            .page-header {
-                padding-top: 65px;
-            }
-
-            .upload-area {
-                padding: 45px 20px;
-            }
-
+        @media (max-width:600px) {
+            .metrics-grid,.quality-grid { grid-template-columns:1fr; }
+            .nav-links a:not(:last-child) { display:none; }
+            .page-header { padding-top:65px; }
+            .upload-area { padding:45px 20px; }
         }
-
     </style>
 </head>
 
-
 <body>
-
 <header>
-
     <div class="container">
-
         <nav>
-
-            <a href="index.html" class="logo">
-                JOHN<span>.</span>
-            </a>
-
+            <a href="index.html" class="logo">JOHN<span>.</span></a>
             <div class="nav-links">
-
-                <a href="index.html#projects">
-                    Projects
-                </a>
-
-                <a href="index.html#about">
-                    About
-                </a>
-
-                <a href="index.html">
-                    ← Home
-                </a>
-
+                <a href="index.html#projects">Projects</a>
+                <a href="index.html#about">About</a>
+                <a href="index.html">← Home</a>
             </div>
-
         </nav>
-
     </div>
-
 </header>
 
-
 <main>
-
-    <section class="page-header">
-
-        <div class="container">
-
-            <div class="eyebrow">
-                Automated Data Analysis
-            </div>
-
-            <h1>
-                Analyze your dataset.
-            </h1>
-
-            <p>
-                Upload a CSV file to inspect its structure, identify
-                potential data-quality problems, understand your variables,
-                and prepare the dataset for deeper statistical and
-                machine-learning analysis.
-            </p>
-
-
-            <!-- UPLOAD -->
-
-            <div class="upload-area" id="uploadArea">
-
-                <div class="upload-icon">
-                    ↑
-                </div>
-
-                <h2>
-                    Upload your dataset
-                </h2>
-
-                <p>
-                    Drag and drop a CSV file here or select one from your computer.
-                </p>
-
-                <label for="fileInput" class="upload-button">
-                    Select CSV File
-                </label>
-
-                <input
-                    type="file"
-                    id="fileInput"
-                    accept=".csv,text/csv"
-                >
-
-                <span class="file-note">
-                    Your dataset is processed locally in your browser.
-                </span>
-
-            </div>
-
-
-            <div id="errorMessage"></div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- RESULTS -->
-
-    <section id="results">
-
-        <div class="container">
-
-
-            <!-- DATASET NAME -->
-
-            <div class="dataset-header">
-
-                <div class="dataset-title">
-
-                    <h2 id="datasetName">
-                        Dataset
-                    </h2>
-
-                    <p id="datasetFileSize">
-                        Dataset successfully loaded.
-                    </p>
-
-                </div>
-
-                <button
-                    class="reset-button"
-                    id="resetButton"
-                >
-                    Analyze Another Dataset
-                </button>
-
-            </div>
-
-
-
-            <!-- METRICS -->
-
-            <div class="metrics-grid">
-
-                <div class="metric-card">
-
-                    <span>
-                        Rows
-                    </span>
-
-                    <strong id="rowCount">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="metric-card">
-
-                    <span>
-                        Columns
-                    </span>
-
-                    <strong id="columnCount">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="metric-card">
-
-                    <span>
-                        Missing Values
-                    </span>
-
-                    <strong id="missingCount">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="metric-card">
-
-                    <span>
-                        Duplicate Rows
-                    </span>
-
-                    <strong id="duplicateCount">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- DATA QUALITY -->
-
-            <div class="analysis-section">
-
-                <h2 class="section-title">
-                    Data Quality
-                </h2>
-
-                <p class="section-description">
-                    Initial inspection of the uploaded dataset.
-                </p>
-
-
-                <div class="quality-grid">
-
-                    <div class="quality-card">
-
-                        <div class="quality-label">
-                            Data Health Score
-                        </div>
-
-                        <div
-                            class="quality-value"
-                            id="healthScore"
-                        >
-                            100%
-                        </div>
-
-                    </div>
-
-
-                    <div class="quality-card">
-
-                        <div class="quality-label">
-                            Numeric Columns
-                        </div>
-
-                        <div
-                            class="quality-value"
-                            id="numericColumns"
-                        >
-                            0
-                        </div>
-
-                    </div>
-
-
-                    <div class="quality-card">
-
-                        <div class="quality-label">
-                            Text / Categorical Columns
-                        </div>
-
-                        <div
-                            class="quality-value"
-                            id="textColumns"
-                        >
-                            0
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- COLUMN ANALYSIS -->
-
-            <div class="analysis-section">
-
-                <h2 class="section-title">
-                    Column Analysis
-                </h2>
-
-                <p class="section-description">
-                    Basic type detection and missing-value inspection.
-                </p>
-
-                <div
-                    class="column-grid"
-                    id="columnAnalysis"
-                >
-                </div>
-
-            </div>
-
-
-
-            <!-- DATA PREVIEW -->
-
-            <div class="analysis-section">
-
-                <h2 class="section-title">
-                    Dataset Preview
-                </h2>
-
-                <p class="section-description">
-                    Showing the first 10 rows.
-                </p>
-
-                <div class="table-wrapper">
-
-                    <table id="previewTable">
-
-                        <thead></thead>
-
-                        <tbody></tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- FUTURE ANALYSIS -->
-
-            <div class="next-step">
-
-                <h3>
-                    Next Stage: Automated Exploratory Analysis
-                </h3>
-
-                <p>
-                    The next version of this platform will calculate
-                    descriptive statistics, identify outliers, analyze
-                    correlations, visualize distributions, and help determine
-                    which variables are appropriate for machine-learning
-                    analysis.
-                </p>
-
-            </div>
-
-
-        </div>
-
-    </section>
-
-</main>
-
-
-
-<footer>
-
+<section class="page-header">
     <div class="container">
-        © 2026 John Barandica • Automated Data Analysis Platform
+        <div class="eyebrow">Automated Data Analysis</div>
+        <h1>Analyze your dataset.</h1>
+        <p>
+            Upload a CSV file to inspect data quality, calculate descriptive statistics,
+            identify outliers and relationships, and visualize important patterns.
+        </p>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">↑</div>
+            <h2>Upload your dataset</h2>
+            <p>Drag and drop a CSV file here or select one from your computer.</p>
+            <label for="fileInput" class="upload-button">Select CSV File</label>
+            <input type="file" id="fileInput" accept=".csv,text/csv">
+            <span class="file-note">Your dataset is processed locally in your browser.</span>
+        </div>
+
+        <div id="errorMessage"></div>
+    </div>
+</section>
+
+<section id="results">
+<div class="container">
+
+    <div class="dataset-header">
+        <div class="dataset-title">
+            <h2 id="datasetName">Dataset</h2>
+            <p id="datasetFileSize">Dataset successfully loaded.</p>
+        </div>
+        <button class="reset-button" id="resetButton">Analyze Another Dataset</button>
     </div>
 
+    <div class="metrics-grid">
+        <div class="metric-card"><span>Rows</span><strong id="rowCount">0</strong></div>
+        <div class="metric-card"><span>Columns</span><strong id="columnCount">0</strong></div>
+        <div class="metric-card"><span>Missing Values</span><strong id="missingCount">0</strong></div>
+        <div class="metric-card"><span>Duplicate Rows</span><strong id="duplicateCount">0</strong></div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Data Quality</h2>
+        <p class="section-description">Initial assessment of the uploaded dataset.</p>
+        <div class="quality-grid">
+            <div class="quality-card">
+                <div class="quality-label">Data Health Score</div>
+                <div class="quality-value" id="healthScore">100%</div>
+            </div>
+            <div class="quality-card">
+                <div class="quality-label">Numeric Columns</div>
+                <div class="quality-value" id="numericColumns">0</div>
+            </div>
+            <div class="quality-card">
+                <div class="quality-label">Text / Categorical</div>
+                <div class="quality-value" id="textColumns">0</div>
+            </div>
+            <div class="quality-card">
+                <div class="quality-label">Potential Outliers</div>
+                <div class="quality-value" id="outlierTotal">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Automated Findings</h2>
+        <p class="section-description">Important observations detected during the initial analysis.</p>
+        <div class="insight-list" id="insightList"></div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Descriptive Statistics</h2>
+        <p class="section-description">
+            Summary statistics for numeric variables. Outliers are detected using the 1.5 × IQR rule.
+        </p>
+        <div class="stats-grid" id="statsGrid"></div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Visual Exploration</h2>
+        <p class="section-description">Inspect numeric and categorical distributions.</p>
+
+        <div class="chart-grid">
+            <div class="chart-panel">
+                <h3>Numeric Distribution</h3>
+                <div class="chart-controls">
+                    <select id="numericSelect"></select>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="histogramChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-panel">
+                <h3>Categorical Frequency</h3>
+                <div class="chart-controls">
+                    <select id="categorySelect"></select>
+                </div>
+                <div class="canvas-wrap">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Correlation Analysis</h2>
+        <p class="section-description">
+            Pearson correlations between numeric variables. Values near +1 or -1 indicate stronger linear relationships.
+        </p>
+        <div class="table-wrapper">
+            <table class="correlation-table">
+                <thead>
+                    <tr>
+                        <th>Variable 1</th>
+                        <th>Variable 2</th>
+                        <th>Correlation</th>
+                        <th>Strength</th>
+                    </tr>
+                </thead>
+                <tbody id="correlationBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Column Analysis</h2>
+        <p class="section-description">Type detection, missing values, cardinality, and column-level quality information.</p>
+        <div class="column-grid" id="columnAnalysis"></div>
+    </div>
+
+    <div class="analysis-section">
+        <h2 class="section-title">Dataset Preview</h2>
+        <p class="section-description">Showing the first 10 rows.</p>
+        <div class="table-wrapper">
+            <table id="previewTable">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="next-step">
+        <h3>Next Stage: Predictive Modeling</h3>
+        <p>
+            The next version will let the user select a target variable, automatically determine whether
+            the problem is classification or regression, preprocess the data, compare machine-learning
+            algorithms, evaluate their performance, and recommend the strongest model.
+        </p>
+    </div>
+
+</div>
+</section>
+</main>
+
+<footer>
+    <div class="container">© 2026 John Barandica • Automated Data Analysis Platform</div>
 </footer>
 
-
-
 <script>
+const fileInput = document.getElementById("fileInput");
+const uploadArea = document.getElementById("uploadArea");
+const resultsSection = document.getElementById("results");
+const errorMessage = document.getElementById("errorMessage");
+const resetButton = document.getElementById("resetButton");
 
-    const fileInput =
-        document.getElementById("fileInput");
+let activeHistogram = null;
+let activeCategoryChart = null;
+let currentDataset = null;
+let currentFields = [];
+let currentColumnStats = [];
 
-    const uploadArea =
-        document.getElementById("uploadArea");
+fileInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+});
 
-    const results =
-        document.getElementById("results");
+uploadArea.addEventListener("dragover", e => {
+    e.preventDefault();
+    uploadArea.classList.add("dragover");
+});
 
-    const errorMessage =
-        document.getElementById("errorMessage");
+uploadArea.addEventListener("dragleave", () => {
+    uploadArea.classList.remove("dragover");
+});
 
-    const resetButton =
-        document.getElementById("resetButton");
+uploadArea.addEventListener("drop", e => {
+    e.preventDefault();
+    uploadArea.classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+});
 
+function processFile(file) {
+    hideError();
 
-    /* =========================================
-       FILE SELECTION
-    ========================================= */
+    const extension = file.name.split(".").pop().toLowerCase();
+    if (extension !== "csv") {
+        showError("Please upload a CSV file.");
+        return;
+    }
 
-    fileInput.addEventListener(
-        "change",
-        function(event) {
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false,
+        complete: parsed => {
+            const data = parsed.data;
+            const fields = parsed.meta.fields || [];
 
-            const file =
-                event.target.files[0];
-
-            if (file) {
-                processFile(file);
-            }
-
-        }
-    );
-
-
-    /* =========================================
-       DRAG AND DROP
-    ========================================= */
-
-    uploadArea.addEventListener(
-        "dragover",
-        function(event) {
-
-            event.preventDefault();
-
-            uploadArea.classList.add(
-                "dragover"
-            );
-
-        }
-    );
-
-
-    uploadArea.addEventListener(
-        "dragleave",
-        function() {
-
-            uploadArea.classList.remove(
-                "dragover"
-            );
-
-        }
-    );
-
-
-    uploadArea.addEventListener(
-        "drop",
-        function(event) {
-
-            event.preventDefault();
-
-            uploadArea.classList.remove(
-                "dragover"
-            );
-
-            const file =
-                event.dataTransfer.files[0];
-
-            if (!file) {
+            if (!data.length || !fields.length) {
+                showError("This file does not appear to contain usable tabular data.");
                 return;
             }
 
-            processFile(file);
+            currentDataset = data;
+            currentFields = fields;
+            analyzeDataset(file, data, fields);
+        },
+        error: () => showError("The CSV could not be read.")
+    });
+}
 
+function analyzeDataset(file, data, fields) {
+    const rowCount = data.length;
+    const columnCount = fields.length;
+    let totalMissing = 0;
+    let numericColumnCount = 0;
+    let textColumnCount = 0;
+    let totalOutliers = 0;
+    const columnStats = [];
+
+    fields.forEach(field => {
+        const rawValues = data.map(row => row[field]);
+        const nonEmpty = rawValues.filter(v => !isMissing(v));
+        const missing = rawValues.length - nonEmpty.length;
+        totalMissing += missing;
+
+        const numericValues = nonEmpty
+            .map(v => Number(String(v).replace(/,/g, "")))
+            .filter(Number.isFinite);
+
+        const numericRatio = nonEmpty.length ? numericValues.length / nonEmpty.length : 0;
+        const isNumeric = numericRatio >= 0.85;
+        const type = isNumeric ? "Numeric" : "Text / Category";
+
+        if (isNumeric) numericColumnCount++;
+        else textColumnCount++;
+
+        const unique = new Set(nonEmpty.map(v => String(v))).size;
+        let numericStats = null;
+
+        if (isNumeric && numericValues.length) {
+            numericStats = calculateNumericStats(numericValues);
+            totalOutliers += numericStats.outlierCount;
         }
-    );
 
+        columnStats.push({
+            name: field,
+            type,
+            missing,
+            unique,
+            numericValues,
+            numericStats
+        });
+    });
 
-    /* =========================================
-       PROCESS CSV
-    ========================================= */
+    currentColumnStats = columnStats;
 
-    function processFile(file) {
+    const duplicateCount = calculateDuplicates(data, fields);
+    const totalCells = rowCount * columnCount;
+    const missingRate = totalCells ? totalMissing / totalCells : 0;
+    const duplicateRate = rowCount ? duplicateCount / rowCount : 0;
 
-        hideError();
+    let healthScore = 100 - ((missingRate * 60) + (duplicateRate * 40)) * 100;
+    healthScore = Math.max(0, Math.min(100, healthScore));
 
-        const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
+    updateDashboard({
+        file, data, fields, rowCount, columnCount,
+        totalMissing, duplicateCount,
+        numericColumnCount, textColumnCount,
+        totalOutliers, healthScore, columnStats
+    });
+}
 
+function calculateNumericStats(values) {
+    const sorted = [...values].sort((a,b) => a-b);
+    const n = sorted.length;
+    const sum = sorted.reduce((a,b) => a+b, 0);
+    const mean = sum / n;
+    const median = quantile(sorted, 0.5);
+    const q1 = quantile(sorted, 0.25);
+    const q3 = quantile(sorted, 0.75);
+    const iqr = q3 - q1;
+    const min = sorted[0];
+    const max = sorted[n - 1];
 
-        if (extension !== "csv") {
+    const variance = n > 1
+        ? sorted.reduce((acc,v) => acc + Math.pow(v - mean, 2), 0) / (n - 1)
+        : 0;
 
-            showError(
-                "Please upload a CSV file."
-            );
+    const std = Math.sqrt(variance);
+    const lower = q1 - 1.5 * iqr;
+    const upper = q3 + 1.5 * iqr;
+    const outlierCount = sorted.filter(v => v < lower || v > upper).length;
 
-            return;
+    return { mean, median, q1, q3, iqr, min, max, std, outlierCount };
+}
 
-        }
+function quantile(sorted, q) {
+    if (!sorted.length) return 0;
+    const pos = (sorted.length - 1) * q;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (sorted[base + 1] !== undefined) {
+        return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+    }
+    return sorted[base];
+}
 
+function calculateDuplicates(data, fields) {
+    const seen = new Set();
+    let duplicates = 0;
 
-        Papa.parse(
-            file,
-            {
+    data.forEach(row => {
+        const key = JSON.stringify(fields.map(field => row[field] ?? ""));
+        if (seen.has(key)) duplicates++;
+        else seen.add(key);
+    });
 
-                header: true,
+    return duplicates;
+}
 
-                skipEmptyLines: true,
+function updateDashboard(ctx) {
+    document.getElementById("datasetName").textContent = ctx.file.name;
+    document.getElementById("datasetFileSize").textContent = formatFileSize(ctx.file.size);
+    document.getElementById("rowCount").textContent = ctx.rowCount.toLocaleString();
+    document.getElementById("columnCount").textContent = ctx.columnCount.toLocaleString();
+    document.getElementById("missingCount").textContent = ctx.totalMissing.toLocaleString();
+    document.getElementById("duplicateCount").textContent = ctx.duplicateCount.toLocaleString();
+    document.getElementById("numericColumns").textContent = ctx.numericColumnCount;
+    document.getElementById("textColumns").textContent = ctx.textColumnCount;
+    document.getElementById("outlierTotal").textContent = ctx.totalOutliers.toLocaleString();
 
-                dynamicTyping: false,
+    const health = document.getElementById("healthScore");
+    health.textContent = ctx.healthScore.toFixed(0) + "%";
+    health.className = "quality-value " + (ctx.healthScore >= 85 ? "good" : "warning");
 
-                complete: function(resultsData) {
+    renderInsights(ctx);
+    renderStats(ctx.columnStats);
+    renderCharts(ctx.data, ctx.columnStats);
+    renderCorrelations(ctx.data, ctx.columnStats);
+    renderColumnAnalysis(ctx.columnStats, ctx.rowCount);
+    renderTable(ctx.data, ctx.fields);
 
-                    if (
-                        resultsData.errors.length > 0 &&
-                        resultsData.data.length === 0
-                    ) {
+    resultsSection.style.display = "block";
+    resultsSection.scrollIntoView({ behavior:"smooth", block:"start" });
+}
 
-                        showError(
-                            "The CSV could not be read. Please verify that the file is formatted correctly."
-                        );
+function renderInsights(ctx) {
+    const container = document.getElementById("insightList");
+    container.innerHTML = "";
 
-                        return;
+    const insights = [];
 
-                    }
+    const missingPct = ctx.rowCount && ctx.columnCount
+        ? (ctx.totalMissing / (ctx.rowCount * ctx.columnCount)) * 100
+        : 0;
 
+    insights.push({
+        title: "Dataset Structure",
+        text: `${ctx.rowCount.toLocaleString()} rows and ${ctx.columnCount} columns were detected.`
+    });
 
-                    const data =
-                        resultsData.data;
+    if (ctx.totalMissing === 0) {
+        insights.push({ title:"Missing Data", text:"No missing values were detected." });
+    } else {
+        insights.push({
+            title:"Missing Data",
+            text:`${ctx.totalMissing.toLocaleString()} cells are missing (${missingPct.toFixed(2)}% of all cells).`
+        });
+    }
 
-                    const fields =
-                        resultsData.meta.fields || [];
+    if (ctx.duplicateCount === 0) {
+        insights.push({ title:"Duplicates", text:"No exact duplicate rows were detected." });
+    } else {
+        insights.push({
+            title:"Duplicates",
+            text:`${ctx.duplicateCount.toLocaleString()} duplicate rows may need review or removal.`
+        });
+    }
 
+    if (ctx.totalOutliers > 0) {
+        insights.push({
+            title:"Potential Outliers",
+            text:`${ctx.totalOutliers.toLocaleString()} numeric observations fall outside the 1.5 × IQR boundaries.`
+        });
+    }
 
-                    if (
-                        data.length === 0 ||
-                        fields.length === 0
-                    ) {
+    const highMissing = ctx.columnStats
+        .filter(c => ctx.rowCount && (c.missing / ctx.rowCount) >= 0.2)
+        .map(c => c.name);
 
-                        showError(
-                            "This file does not appear to contain usable tabular data."
-                        );
+    if (highMissing.length) {
+        insights.push({
+            title:"High Missingness",
+            text:`Review ${highMissing.slice(0,4).join(", ")}${highMissing.length > 4 ? " and others" : ""}; each has at least 20% missing values.`
+        });
+    }
 
-                        return;
+    const strongPairs = calculateCorrelationPairs(ctx.data, ctx.columnStats)
+        .filter(p => Math.abs(p.r) >= 0.7);
 
-                    }
+    if (strongPairs.length) {
+        const p = strongPairs[0];
+        insights.push({
+            title:"Strong Relationship",
+            text:`${p.a} and ${p.b} show a strong linear relationship (r = ${p.r.toFixed(2)}).`
+        });
+    }
 
+    insights.slice(0,6).forEach(item => {
+        const card = document.createElement("div");
+        card.className = "insight-card";
 
-                    analyzeDataset(
-                        file,
-                        data,
-                        fields
-                    );
+        const title = document.createElement("strong");
+        title.textContent = item.title;
 
+        const text = document.createElement("p");
+        text.textContent = item.text;
+
+        card.append(title, text);
+        container.appendChild(card);
+    });
+}
+
+function renderStats(columns) {
+    const grid = document.getElementById("statsGrid");
+    grid.innerHTML = "";
+
+    const numeric = columns.filter(c => c.type === "Numeric" && c.numericStats);
+
+    if (!numeric.length) {
+        const card = document.createElement("div");
+        card.className = "stat-card";
+        card.textContent = "No numeric columns were detected.";
+        grid.appendChild(card);
+        return;
+    }
+
+    numeric.forEach(col => {
+        const s = col.numericStats;
+        const card = document.createElement("div");
+        card.className = "stat-card";
+
+        const title = document.createElement("h3");
+        title.textContent = col.name;
+        card.appendChild(title);
+
+        [
+            ["Mean", fmt(s.mean)],
+            ["Median", fmt(s.median)],
+            ["Std. Dev.", fmt(s.std)],
+            ["Minimum", fmt(s.min)],
+            ["Q1", fmt(s.q1)],
+            ["Q3", fmt(s.q3)],
+            ["Maximum", fmt(s.max)],
+            ["Outliers", s.outlierCount.toLocaleString()]
+        ].forEach(([label,value]) => {
+            const row = document.createElement("div");
+            row.className = "stat-row";
+
+            const left = document.createElement("span");
+            left.textContent = label;
+
+            const right = document.createElement("strong");
+            right.textContent = value;
+
+            row.append(left,right);
+            card.appendChild(row);
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+function renderCharts(data, columns) {
+    const numericSelect = document.getElementById("numericSelect");
+    const categorySelect = document.getElementById("categorySelect");
+
+    numericSelect.innerHTML = "";
+    categorySelect.innerHTML = "";
+
+    const numeric = columns.filter(c => c.type === "Numeric" && c.numericValues.length);
+    const categorical = columns.filter(c => c.type !== "Numeric");
+
+    if (numeric.length) {
+        numeric.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.name;
+            opt.textContent = c.name;
+            numericSelect.appendChild(opt);
+        });
+
+        drawHistogram(numeric[0]);
+        numericSelect.onchange = () => {
+            const col = numeric.find(c => c.name === numericSelect.value);
+            if (col) drawHistogram(col);
+        };
+    } else {
+        addDisabledOption(numericSelect, "No numeric columns");
+        destroyHistogram();
+    }
+
+    if (categorical.length) {
+        categorical.forEach(c => {
+            const opt = document.createElement("option");
+            opt.value = c.name;
+            opt.textContent = c.name;
+            categorySelect.appendChild(opt);
+        });
+
+        drawCategoryChart(data, categorical[0].name);
+        categorySelect.onchange = () => drawCategoryChart(data, categorySelect.value);
+    } else {
+        addDisabledOption(categorySelect, "No categorical columns");
+        destroyCategoryChart();
+    }
+}
+
+function drawHistogram(column) {
+    destroyHistogram();
+
+    const values = column.numericValues;
+    if (!values.length) return;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    let binCount = Math.min(12, Math.max(5, Math.ceil(Math.sqrt(values.length))));
+    if (min === max) binCount = 1;
+
+    const width = binCount === 1 ? 1 : (max - min) / binCount;
+    const counts = Array(binCount).fill(0);
+    const labels = [];
+
+    for (let i=0; i<binCount; i++) {
+        const start = min + i * width;
+        const end = i === binCount - 1 ? max : start + width;
+        labels.push(binCount === 1 ? fmt(min) : `${fmt(start)}–${fmt(end)}`);
+    }
+
+    values.forEach(v => {
+        let idx = binCount === 1 ? 0 : Math.floor((v - min) / width);
+        if (idx >= binCount) idx = binCount - 1;
+        if (idx < 0) idx = 0;
+        counts[idx]++;
+    });
+
+    activeHistogram = new Chart(document.getElementById("histogramChart"), {
+        type:"bar",
+        data:{
+            labels,
+            datasets:[{
+                label:column.name,
+                data:counts,
+                backgroundColor:"rgba(71,184,255,.65)",
+                borderColor:"#47b8ff",
+                borderWidth:1
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{display:false},
+                tooltip:{callbacks:{title:items => items[0]?.label || ""}}
+            },
+            scales:{
+                x:{
+                    ticks:{color:"#91a4b9", maxRotation:45, minRotation:0},
+                    grid:{display:false}
+                },
+                y:{
+                    beginAtZero:true,
+                    ticks:{color:"#91a4b9", precision:0},
+                    grid:{color:"rgba(255,255,255,.06)"}
                 }
-
             }
-        );
+        }
+    });
+}
 
-    }
+function drawCategoryChart(data, field) {
+    destroyCategoryChart();
 
+    const counts = new Map();
 
+    data.forEach(row => {
+        const raw = row[field];
+        const key = isMissing(raw) ? "(Missing)" : String(raw);
+        counts.set(key, (counts.get(key) || 0) + 1);
+    });
 
-    /* =========================================
-       MAIN ANALYSIS
-    ========================================= */
+    const top = [...counts.entries()]
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,12);
 
-    function analyzeDataset(
-        file,
-        data,
-        fields
-    ) {
-
-        const rowCount =
-            data.length;
-
-        const columnCount =
-            fields.length;
-
-
-        let totalMissing = 0;
-
-        let numericColumnCount = 0;
-
-        let textColumnCount = 0;
-
-
-        const columnStats = [];
-
-
-        fields.forEach(
-            function(field) {
-
-                const values =
-                    data.map(
-                        row => row[field]
-                    );
-
-
-                const nonEmptyValues =
-                    values.filter(
-                        value =>
-                            value !== null &&
-                            value !== undefined &&
-                            String(value).trim() !== ""
-                    );
-
-
-                const missing =
-                    values.length -
-                    nonEmptyValues.length;
-
-
-                totalMissing += missing;
-
-
-                const numericValues =
-                    nonEmptyValues.filter(
-                        value =>
-                            !isNaN(Number(value)) &&
-                            String(value).trim() !== ""
-                    );
-
-
-                const numericRatio =
-                    nonEmptyValues.length === 0
-                        ? 0
-                        : numericValues.length /
-                          nonEmptyValues.length;
-
-
-                const type =
-                    numericRatio >= 0.85
-                        ? "Numeric"
-                        : "Text / Category";
-
-
-                if (type === "Numeric") {
-                    numericColumnCount++;
-                } else {
-                    textColumnCount++;
+    activeCategoryChart = new Chart(document.getElementById("categoryChart"), {
+        type:"bar",
+        data:{
+            labels:top.map(x => x[0]),
+            datasets:[{
+                label:"Count",
+                data:top.map(x => x[1]),
+                backgroundColor:"rgba(106,201,164,.65)",
+                borderColor:"rgba(106,201,164,1)",
+                borderWidth:1
+            }]
+        },
+        options:{
+            indexAxis:"y",
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{
+                x:{
+                    beginAtZero:true,
+                    ticks:{color:"#91a4b9", precision:0},
+                    grid:{color:"rgba(255,255,255,.06)"}
+                },
+                y:{
+                    ticks:{color:"#91a4b9"},
+                    grid:{display:false}
                 }
-
-
-                const uniqueValues =
-                    new Set(
-                        nonEmptyValues.map(
-                            value =>
-                                String(value)
-                        )
-                    ).size;
-
-
-                columnStats.push(
-                    {
-                        name: field,
-                        type: type,
-                        missing: missing,
-                        unique: uniqueValues
-                    }
-                );
-
             }
-        );
+        }
+    });
+}
 
+function renderCorrelations(data, columns) {
+    const tbody = document.getElementById("correlationBody");
+    tbody.innerHTML = "";
 
-        const duplicateCount =
-            calculateDuplicates(
-                data,
-                fields
-            );
+    const pairs = calculateCorrelationPairs(data, columns);
 
-
-        const totalCells =
-            rowCount *
-            columnCount;
-
-
-        const missingRate =
-            totalCells === 0
-                ? 0
-                : totalMissing /
-                  totalCells;
-
-
-        const duplicateRate =
-            rowCount === 0
-                ? 0
-                : duplicateCount /
-                  rowCount;
-
-
-        let healthScore =
-            100 -
-            (
-                missingRate * 60 +
-                duplicateRate * 40
-            ) * 100;
-
-
-        healthScore =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    healthScore
-                )
-            );
-
-
-        updateDashboard(
-            file,
-            rowCount,
-            columnCount,
-            totalMissing,
-            duplicateCount,
-            numericColumnCount,
-            textColumnCount,
-            healthScore,
-            columnStats,
-            data,
-            fields
-        );
-
+    if (!pairs.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.textContent = "At least two numeric columns are required for correlation analysis.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
     }
 
+    pairs.slice(0,20).forEach(pair => {
+        const tr = document.createElement("tr");
+        const strength = correlationStrength(pair.r);
 
+        [pair.a, pair.b].forEach(v => {
+            const td = document.createElement("td");
+            td.textContent = v;
+            tr.appendChild(td);
+        });
 
-    /* =========================================
-       DUPLICATE DETECTION
-    ========================================= */
+        const value = document.createElement("td");
+        value.className = "value";
+        value.textContent = pair.r.toFixed(3);
+        tr.appendChild(value);
 
-    function calculateDuplicates(
-        data,
-        fields
-    ) {
+        const strengthCell = document.createElement("td");
+        strengthCell.textContent = strength.label;
+        if (strength.className) strengthCell.className = strength.className;
+        tr.appendChild(strengthCell);
 
-        const seen =
-            new Set();
+        tbody.appendChild(tr);
+    });
+}
 
-        let duplicates =
-            0;
+function calculateCorrelationPairs(data, columns) {
+    const numeric = columns.filter(c => c.type === "Numeric");
+    const pairs = [];
 
+    for (let i=0; i<numeric.length; i++) {
+        for (let j=i+1; j<numeric.length; j++) {
+            const a = numeric[i].name;
+            const b = numeric[j].name;
+            const x = [];
+            const y = [];
 
-        data.forEach(
-            function(row) {
-
-                const rowKey =
-                    fields
-                        .map(
-                            field =>
-                                String(
-                                    row[field] ?? ""
-                                )
-                        )
-                        .join("||");
-
-
-                if (
-                    seen.has(rowKey)
-                ) {
-
-                    duplicates++;
-
-                } else {
-
-                    seen.add(rowKey);
-
+            data.forEach(row => {
+                if (isMissing(row[a]) || isMissing(row[b])) return;
+                const xv = Number(String(row[a]).replace(/,/g,""));
+                const yv = Number(String(row[b]).replace(/,/g,""));
+                if (Number.isFinite(xv) && Number.isFinite(yv)) {
+                    x.push(xv); y.push(yv);
                 }
+            });
 
+            if (x.length >= 3) {
+                const r = pearson(x,y);
+                if (Number.isFinite(r)) pairs.push({a,b,r});
             }
-        );
-
-
-        return duplicates;
-
+        }
     }
 
+    return pairs.sort((p1,p2) => Math.abs(p2.r) - Math.abs(p1.r));
+}
 
+function pearson(x,y) {
+    const n = x.length;
+    if (n !== y.length || n < 2) return NaN;
 
-    /* =========================================
-       UPDATE UI
-    ========================================= */
+    const meanX = x.reduce((a,b)=>a+b,0)/n;
+    const meanY = y.reduce((a,b)=>a+b,0)/n;
 
-    function updateDashboard(
-        file,
-        rowCount,
-        columnCount,
-        missingCount,
-        duplicateCount,
-        numericColumns,
-        textColumns,
-        healthScore,
-        columnStats,
-        data,
-        fields
-    ) {
+    let numerator = 0;
+    let dx2 = 0;
+    let dy2 = 0;
 
-        document.getElementById(
-            "datasetName"
-        ).textContent =
-            file.name;
+    for (let i=0;i<n;i++) {
+        const dx = x[i] - meanX;
+        const dy = y[i] - meanY;
+        numerator += dx * dy;
+        dx2 += dx * dx;
+        dy2 += dy * dy;
+    }
 
+    const denom = Math.sqrt(dx2 * dy2);
+    return denom === 0 ? NaN : numerator / denom;
+}
 
-        document.getElementById(
-            "datasetFileSize"
-        ).textContent =
-            formatFileSize(
-                file.size
-            );
+function correlationStrength(r) {
+    const a = Math.abs(r);
+    if (a >= .7) return {label:"Strong", className:"corr-strong"};
+    if (a >= .4) return {label:"Moderate", className:"corr-medium"};
+    if (a >= .2) return {label:"Weak", className:""};
+    return {label:"Very weak", className:""};
+}
 
+function renderColumnAnalysis(columns, rowCount) {
+    const container = document.getElementById("columnAnalysis");
+    container.innerHTML = "";
 
-        document.getElementById(
-            "rowCount"
-        ).textContent =
-            rowCount.toLocaleString();
+    columns.forEach(column => {
+        const missingPercent = rowCount ? (column.missing / rowCount) * 100 : 0;
 
+        const card = document.createElement("div");
+        card.className = "column-card";
 
-        document.getElementById(
-            "columnCount"
-        ).textContent =
-            columnCount.toLocaleString();
+        const header = document.createElement("div");
+        header.className = "column-header";
 
+        const name = document.createElement("div");
+        name.className = "column-name";
+        name.textContent = column.name;
 
-        document.getElementById(
-            "missingCount"
-        ).textContent =
-            missingCount.toLocaleString();
+        const type = document.createElement("div");
+        type.className = "column-type";
+        type.textContent = column.type;
 
+        header.append(name,type);
 
-        document.getElementById(
-            "duplicateCount"
-        ).textContent =
-            duplicateCount.toLocaleString();
+        const details = document.createElement("div");
+        details.className = "column-details";
 
+        const lines = [
+            `Missing: ${column.missing.toLocaleString()} (${missingPercent.toFixed(1)}%)`,
+            `Unique values: ${column.unique.toLocaleString()}`
+        ];
 
-        document.getElementById(
-            "numericColumns"
-        ).textContent =
-            numericColumns;
-
-
-        document.getElementById(
-            "textColumns"
-        ).textContent =
-            textColumns;
-
-
-        const healthElement =
-            document.getElementById(
-                "healthScore"
-            );
-
-
-        healthElement.textContent =
-            healthScore.toFixed(0) +
-            "%";
-
-
-        if (
-            healthScore >= 85
-        ) {
-
-            healthElement.className =
-                "quality-value good";
-
-        } else {
-
-            healthElement.className =
-                "quality-value warning";
-
+        if (column.numericStats) {
+            lines.push(`Potential outliers: ${column.numericStats.outlierCount.toLocaleString()}`);
         }
 
+        details.innerHTML = lines.map(escapeHTML).join("<br>");
 
-        renderColumnAnalysis(
-            columnStats,
-            rowCount
-        );
+        card.append(header,details);
+        container.appendChild(card);
+    });
+}
 
+function renderTable(data, fields) {
+    const table = document.getElementById("previewTable");
+    const thead = table.querySelector("thead");
+    const tbody = table.querySelector("tbody");
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
 
-        renderTable(
-            data,
-            fields
-        );
+    const headerRow = document.createElement("tr");
+    fields.forEach(field => {
+        const th = document.createElement("th");
+        th.textContent = field;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
 
+    data.slice(0,10).forEach(row => {
+        const tr = document.createElement("tr");
+        fields.forEach(field => {
+            const td = document.createElement("td");
+            td.textContent = isMissing(row[field]) ? "—" : row[field];
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+}
 
-        results.style.display =
-            "block";
+function addDisabledOption(select, label) {
+    const opt = document.createElement("option");
+    opt.textContent = label;
+    opt.disabled = true;
+    opt.selected = true;
+    select.appendChild(opt);
+}
 
-
-        results.scrollIntoView(
-            {
-                behavior: "smooth",
-                block: "start"
-            }
-        );
-
+function destroyHistogram() {
+    if (activeHistogram) {
+        activeHistogram.destroy();
+        activeHistogram = null;
     }
+}
 
-
-
-    /* =========================================
-       COLUMN CARDS
-    ========================================= */
-
-    function renderColumnAnalysis(
-        columns,
-        rowCount
-    ) {
-
-        const container =
-            document.getElementById(
-                "columnAnalysis"
-            );
-
-
-        container.innerHTML =
-            "";
-
-
-        columns.forEach(
-            function(column) {
-
-                const missingPercent =
-                    rowCount === 0
-                        ? 0
-                        : (
-                            column.missing /
-                            rowCount
-                        ) * 100;
-
-
-                const card =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                card.className =
-                    "column-card";
-
-
-                card.innerHTML =
-                    `
-                    <div class="column-header">
-
-                        <div class="column-name">
-                            ${escapeHTML(column.name)}
-                        </div>
-
-                        <div class="column-type">
-                            ${escapeHTML(column.type)}
-                        </div>
-
-                    </div>
-
-                    <div class="column-details">
-
-                        Missing:
-                        ${column.missing}
-                        (${missingPercent.toFixed(1)}%)
-
-                        <br>
-
-                        Unique values:
-                        ${column.unique}
-
-                    </div>
-                    `;
-
-
-                container.appendChild(
-                    card
-                );
-
-            }
-        );
-
+function destroyCategoryChart() {
+    if (activeCategoryChart) {
+        activeCategoryChart.destroy();
+        activeCategoryChart = null;
     }
-
-
-
-    /* =========================================
-       DATA PREVIEW TABLE
-    ========================================= */
-
-    function renderTable(
-        data,
-        fields
-    ) {
-
-        const table =
-            document.getElementById(
-                "previewTable"
-            );
-
-
-        const thead =
-            table.querySelector(
-                "thead"
-            );
-
-
-        const tbody =
-            table.querySelector(
-                "tbody"
-            );
-
-
-        thead.innerHTML =
-            "";
-
-        tbody.innerHTML =
-            "";
-
-
-        const headerRow =
-            document.createElement(
-                "tr"
-            );
-
-
-        fields.forEach(
-            function(field) {
-
-                const th =
-                    document.createElement(
-                        "th"
-                    );
-
-
-                th.textContent =
-                    field;
-
-
-                headerRow.appendChild(
-                    th
-                );
-
-            }
-        );
-
-
-        thead.appendChild(
-            headerRow
-        );
-
-
-        data
-            .slice(0, 10)
-            .forEach(
-                function(row) {
-
-                    const tr =
-                        document.createElement(
-                            "tr"
-                        );
-
-
-                    fields.forEach(
-                        function(field) {
-
-                            const td =
-                                document.createElement(
-                                    "td"
-                                );
-
-
-                            const value =
-                                row[field];
-
-
-                            td.textContent =
-                                value === null ||
-                                value === undefined ||
-                                value === ""
-                                    ? "—"
-                                    : value;
-
-
-                            tr.appendChild(
-                                td
-                            );
-
-                        }
-                    );
-
-
-                    tbody.appendChild(
-                        tr
-                    );
-
-                }
-            );
-
-    }
-
-
-
-    /* =========================================
-       HELPERS
-    ========================================= */
-
-    function formatFileSize(
-        bytes
-    ) {
-
-        if (
-            bytes < 1024
-        ) {
-
-            return (
-                bytes +
-                " bytes"
-            );
-
-        }
-
-
-        if (
-            bytes <
-            1024 * 1024
-        ) {
-
-            return (
-                (
-                    bytes /
-                    1024
-                ).toFixed(1) +
-                " KB"
-            );
-
-        }
-
-
-        return (
-            (
-                bytes /
-                (
-                    1024 *
-                    1024
-                )
-            ).toFixed(1) +
-            " MB"
-        );
-
-    }
-
-
-    function escapeHTML(
-        value
-    ) {
-
-        return String(value)
-            .replaceAll(
-                "&",
-                "&amp;"
-            )
-            .replaceAll(
-                "<",
-                "&lt;"
-            )
-            .replaceAll(
-                ">",
-                "&gt;"
-            )
-            .replaceAll(
-                '"',
-                "&quot;"
-            )
-            .replaceAll(
-                "'",
-                "&#039;"
-            );
-
-    }
-
-
-    function showError(
-        message
-    ) {
-
-        errorMessage.textContent =
-            message;
-
-        errorMessage.style.display =
-            "block";
-
-    }
-
-
-    function hideError() {
-
-        errorMessage.style.display =
-            "none";
-
-    }
-
-
-
-    /* =========================================
-       RESET
-    ========================================= */
-
-    resetButton.addEventListener(
-        "click",
-        function() {
-
-            fileInput.value =
-                "";
-
-            results.style.display =
-                "none";
-
-            hideError();
-
-            window.scrollTo(
-                {
-                    top: 0,
-                    behavior: "smooth"
-                }
-            );
-
-        }
-    );
-
+}
+
+function isMissing(v) {
+    return v === null || v === undefined || String(v).trim() === "";
+}
+
+function fmt(value) {
+    if (!Number.isFinite(value)) return "—";
+    const abs = Math.abs(value);
+    if (abs >= 1000000) return value.toLocaleString(undefined,{maximumFractionDigits:2});
+    if (abs >= 1000) return value.toLocaleString(undefined,{maximumFractionDigits:2});
+    return Number(value.toFixed(3)).toLocaleString();
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + " bytes";
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + " KB";
+    return (bytes/(1024*1024)).toFixed(1) + " MB";
+}
+
+function escapeHTML(value) {
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.style.display = "block";
+}
+
+function hideError() {
+    errorMessage.style.display = "none";
+}
+
+resetButton.addEventListener("click", () => {
+    fileInput.value = "";
+    resultsSection.style.display = "none";
+    currentDataset = null;
+    currentFields = [];
+    currentColumnStats = [];
+    destroyHistogram();
+    destroyCategoryChart();
+    hideError();
+    window.scrollTo({top:0,behavior:"smooth"});
+});
 </script>
-
-
 </body>
 </html>
