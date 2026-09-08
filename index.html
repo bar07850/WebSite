@@ -1,395 +1,1203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>John Barandica | Data & AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta
-    name="description"
-    content="Portfolio site for John Barandica - data science, analytics, and AI projects."
-  />
-  <style>
-    :root {
-      --bg: #050816;
-      --accent: #38bdf8;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --card: #111827;
-      --border: #1f2937;
-      --radius-xl: 18px;
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.4);
-      --transition: 200ms ease;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <title>John Barandica | Data Analyst & Data Scientist</title>
 
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: radial-gradient(circle at top, #111827, #020617 55%);
-      color: var(--text);
-      line-height: 1.6;
-      -webkit-font-smoothing: antialiased;
-    }
+    <meta
+        name="description"
+        content="John Barandica is a data analyst and data scientist building analytics, machine learning, and AI-powered applications."
+    >
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    main {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 24px 18px 60px;
-    }
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      margin-bottom: 28px;
-    }
+    <style>
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        /* =========================================
+           GLOBAL
+        ========================================= */
 
-    .logo-badge {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #38bdf8, #1d4ed8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .logo-text {
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    nav {
-      display: flex;
-      gap: 18px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
+        body {
+            font-family: "Inter", sans-serif;
+            background: #07111f;
+            color: #ffffff;
+            line-height: 1.6;
+        }
 
-    nav a {
-      padding-bottom: 3px;
-      border-bottom: 1px solid transparent;
-      cursor: pointer;
-      transition: color var(--transition), border var(--transition),
-        transform var(--transition);
-    }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
 
-    nav a:hover {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-      transform: translateY(-1px);
-    }
+        .container {
+            width: min(1120px, 90%);
+            margin: auto;
+        }
 
-    h1 {
-      font-size: clamp(2rem, 3vw, 2.5rem);
-      margin-bottom: 8px;
-    }
 
-    h1 span {
-      color: var(--accent);
-    }
+        /* =========================================
+           NAVIGATION
+        ========================================= */
 
-    .subtitle {
-      font-size: 0.95rem;
-      color: var(--muted);
-      max-width: 520px;
-      margin-bottom: 18px;
-    }
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
 
-    section {
-      margin-bottom: 40px;
-    }
+            background: rgba(7, 17, 31, 0.9);
+            backdrop-filter: blur(14px);
 
-    .section-title {
-      font-size: 1rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
 
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 26px;
-      padding: 26px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, #020617, #0b1120);
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 34px;
-    }
+        nav {
+            min-height: 76px;
 
-    .tag {
-      display: inline-block;
-      font-size: 0.75rem;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--muted);
-      margin-right: 6px;
-      margin-bottom: 8px;
-    }
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    .btn {
-      display: inline-block;
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--transition);
-      margin-right: 8px;
-      margin-top: 10px;
-    }
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #38bdf8, #2563eb);
-      color: #0b1120;
-    }
+        .logo span {
+            color: #47b8ff;
+        }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.5);
-    }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
 
-    .btn-ghost {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--muted);
-    }
+        .nav-links a {
+            color: #cbd5e1;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
 
-    .btn-ghost:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-      transform: translateY(-1px);
-    }
+        .nav-links a:hover {
+            color: #ffffff;
+        }
 
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 16px;
-    }
+        .nav-button {
+            padding: 11px 18px;
+            border-radius: 8px;
+            background: #47b8ff;
+            color: #07111f !important;
+            font-weight: 700 !important;
+        }
 
-    .card {
-      background: var(--card);
-      border-radius: var(--radius-xl);
-      padding: 16px;
-      border: 1px solid var(--border);
-      transition: transform var(--transition), border var(--transition);
-    }
 
-    .card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent);
-    }
+        /* =========================================
+           HERO
+        ========================================= */
 
-    .card-title {
-      font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 4px;
-    }
+        .hero {
+            min-height: 680px;
 
-    .card-meta {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+            display: flex;
+            align-items: center;
 
-    .card-body {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+            background:
+                radial-gradient(
+                    circle at 75% 30%,
+                    rgba(71,184,255,0.15),
+                    transparent 35%
+                );
+        }
 
-    .skills-list {
-      list-style: none;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      font-size: 0.8rem;
-    }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 70px;
+            align-items: center;
+        }
 
-    .skills-list li {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      border-radius: 999px;
-      padding: 5px 10px;
-    }
+        .eyebrow {
+            color: #47b8ff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
 
-    .contact-card {
-      border-radius: var(--radius-xl);
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      background: radial-gradient(circle at top left, #020617, #020617);
-      padding: 18px;
-    }
+        .hero h1 {
+            font-size: clamp(48px, 7vw, 82px);
+            line-height: 1;
+            letter-spacing: -4px;
+            margin-bottom: 24px;
+        }
 
-    .socials {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
+        .hero h1 span {
+            color: #47b8ff;
+        }
 
-    .social-link {
-      font-size: 0.8rem;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--muted);
-      transition: border var(--transition), color var(--transition);
-    }
+        .hero-copy {
+            max-width: 660px;
+            color: #a9b7c8;
+            font-size: 19px;
+            margin-bottom: 34px;
+        }
 
-    .social-link:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
 
-    footer {
-      margin-top: 24px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-align: center;
-    }
+        .primary-button,
+        .secondary-button {
 
-    @media (max-width: 820px) {
-      .hero {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+            padding: 15px 24px;
+            border-radius: 9px;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            transition: 0.2s;
+        }
+
+        .primary-button {
+            background: #47b8ff;
+            color: #07111f;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .secondary-button {
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #ffffff;
+        }
+
+        .secondary-button:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+
+        /* =========================================
+           HERO ANALYTICS CARD
+        ========================================= */
+
+        .analytics-preview {
+
+            background: rgba(15, 28, 45, 0.75);
+
+            border: 1px solid rgba(255,255,255,0.1);
+
+            border-radius: 18px;
+
+            padding: 26px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 24px;
+        }
+
+        .preview-header strong {
+            font-size: 15px;
+        }
+
+        .status {
+            color: #4ade80;
+            font-size: 13px;
+        }
+
+        .metric-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(2, 1fr);
+
+            gap: 12px;
+
+            margin-bottom: 22px;
+        }
+
+        .metric {
+
+            background: rgba(255,255,255,0.04);
+
+            border-radius: 10px;
+
+            padding: 16px;
+        }
+
+        .metric small {
+            display: block;
+            color: #8392a5;
+            margin-bottom: 7px;
+        }
+
+        .metric strong {
+            font-size: 24px;
+        }
+
+        .model-box {
+
+            background: rgba(71,184,255,0.08);
+
+            border: 1px solid rgba(71,184,255,0.2);
+
+            border-radius: 10px;
+
+            padding: 18px;
+        }
+
+        .model-box small {
+            color: #8ba3b8;
+        }
+
+        .model-name {
+            font-size: 21px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .model-score {
+            margin-top: 5px;
+            color: #47b8ff;
+        }
+
+
+        /* =========================================
+           SECTION GLOBAL
+        ========================================= */
+
+        section {
+            padding: 110px 0;
+        }
+
+        .section-label {
+
+            color: #47b8ff;
+
+            text-transform: uppercase;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+
+            font-size: clamp(34px, 5vw, 54px);
+
+            letter-spacing: -2px;
+
+            margin-bottom: 18px;
+        }
+
+        .section-description {
+
+            max-width: 700px;
+
+            color: #9aabc0;
+
+            font-size: 17px;
+        }
+
+
+        /* =========================================
+           ANALYZER FEATURE
+        ========================================= */
+
+        .analyzer-section {
+            background: #0a1625;
+        }
+
+        .feature-grid {
+
+            margin-top: 52px;
+
+            display: grid;
+
+            grid-template-columns: repeat(4, 1fr);
+
+            gap: 18px;
+        }
+
+        .feature-card {
+
+            padding: 24px;
+
+            border-radius: 12px;
+
+            background: #0d1b2b;
+
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .feature-number {
+
+            color: #47b8ff;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            margin-bottom: 16px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .feature-card p {
+            color: #8fa0b4;
+            font-size: 14px;
+        }
+
+        .analyzer-action {
+            margin-top: 40px;
+        }
+
+
+        /* =========================================
+           PROJECTS
+        ========================================= */
+
+        .projects-grid {
+
+            margin-top: 50px;
+
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 20px;
+        }
+
+        .project-card {
+
+            min-height: 280px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+
+            padding: 28px;
+
+            border-radius: 14px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(71,184,255,0.08),
+                    rgba(13,27,43,1)
+                );
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            transition: 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(71,184,255,0.4);
+        }
+
+        .project-type {
+
+            color: #47b8ff;
+
+            font-size: 12px;
+
+            text-transform: uppercase;
+
+            font-weight: 700;
+
+            letter-spacing: 1px;
+
+            margin-bottom: 8px;
+        }
+
+        .project-card h3 {
+
+            font-size: 23px;
+
+            margin-bottom: 10px;
+        }
+
+        .project-card p {
+
+            color: #9aabc0;
+
+            font-size: 14px;
+
+            margin-bottom: 20px;
+        }
+
+        .project-link {
+
+            color: #47b8ff;
+
+            font-weight: 600;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================================
+           SKILLS
+        ========================================= */
+
+        .skills {
+            background: #0a1625;
+        }
+
+        .skills-list {
+
+            margin-top: 40px;
+
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 12px;
+        }
+
+        .skill {
+
+            border: 1px solid rgba(255,255,255,0.1);
+
+            padding: 10px 16px;
+
+            border-radius: 100px;
+
+            color: #c0cede;
+
+            font-size: 14px;
+        }
+
+
+        /* =========================================
+           ABOUT
+        ========================================= */
+
+        .about-grid {
+
+            display: grid;
+
+            grid-template-columns: 0.7fr 1.3fr;
+
+            gap: 70px;
+
+            align-items: start;
+        }
+
+        .about-copy p {
+
+            color: #9aabc0;
+
+            margin-bottom: 18px;
+
+            font-size: 16px;
+        }
+
+
+        /* =========================================
+           CONTACT
+        ========================================= */
+
+        .contact {
+            text-align: center;
+            background: #0a1625;
+        }
+
+        .contact .section-description {
+            margin: auto;
+        }
+
+        .contact-buttons {
+
+            margin-top: 34px;
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 14px;
+
+            flex-wrap: wrap;
+        }
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        footer {
+
+            padding: 35px 0;
+
+            border-top: 1px solid rgba(255,255,255,0.08);
+
+            color: #718399;
+
+            font-size: 13px;
+        }
+
+        .footer-content {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 20px;
+
+            flex-wrap: wrap;
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 900px) {
+
+            .hero-grid,
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .analytics-preview {
+                max-width: 600px;
+            }
+
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links a:not(.nav-button) {
+                display: none;
+            }
+        }
+
+
+        @media (max-width: 550px) {
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 80px 0;
+            }
+
+            section {
+                padding: 80px 0;
+            }
+
+            .hero h1 {
+                letter-spacing: -2px;
+            }
+        }
+
+    </style>
+
 </head>
+
 <body>
-  <main>
-    <header>
-      <div class="logo">
-        <div class="logo-badge">JB</div>
-        <div class="logo-text">Data · Analytics · AI</div>
-      </div>
-      <nav>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </header>
 
-    <section class="hero">
-      <div>
-        <h1>Hi, I'm <span>John Barandica</span>.</h1>
-        <p class="subtitle">
-          Data & AI practitioner with experience in utilities and federal
-          operations. I work with data to strengthen decision-making, compliance,
-          and mission readiness.
-        </p>
+
+<!-- =========================================
+     NAVIGATION
+========================================= -->
+
+<header>
+
+    <div class="container">
+
+        <nav>
+
+            <a href="#" class="logo">
+                JOHN<span>.</span>
+            </a>
+
+            <div class="nav-links">
+
+                <a href="#projects">Projects</a>
+
+                <a href="#skills">Skills</a>
+
+                <a href="#about">About</a>
+
+                <a href="#contact">Contact</a>
+
+                <a href="analyze.html" class="nav-button">
+                    Analyze Data
+                </a>
+
+            </div>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+
+<!-- =========================================
+     HERO
+========================================= -->
+
+<main>
+
+<section class="hero">
+
+    <div class="container hero-grid">
+
         <div>
-          <span class="tag">Data Analytics</span>
-          <span class="tag">Machine Learning</span>
-          <span class="tag">Process Improvement</span>
+
+            <div class="eyebrow">
+                Data • Analytics • Machine Learning
+            </div>
+
+            <h1>
+                Turning data into
+                <span>decisions.</span>
+            </h1>
+
+            <p class="hero-copy">
+
+                I'm John Barandica, a data analyst and data scientist
+                building analytics, machine-learning, and AI-powered
+                solutions that turn complex datasets into actionable insight.
+
+            </p>
+
+            <div class="hero-buttons">
+
+                <a
+                    href="analyze.html"
+                    class="primary-button"
+                >
+                    Analyze My Dataset →
+                </a>
+
+                <a
+                    href="#projects"
+                    class="secondary-button"
+                >
+                    View My Work
+                </a>
+
+            </div>
+
         </div>
+
+
+        <!-- ANALYTICS DEMO CARD -->
+
+        <div class="analytics-preview">
+
+            <div class="preview-header">
+
+                <strong>
+                    Dataset Analysis
+                </strong>
+
+                <span class="status">
+                    ● Complete
+                </span>
+
+            </div>
+
+
+            <div class="metric-grid">
+
+                <div class="metric">
+
+                    <small>Rows</small>
+
+                    <strong>10,492</strong>
+
+                </div>
+
+                <div class="metric">
+
+                    <small>Columns</small>
+
+                    <strong>18</strong>
+
+                </div>
+
+                <div class="metric">
+
+                    <small>Data Health</small>
+
+                    <strong>92%</strong>
+
+                </div>
+
+                <div class="metric">
+
+                    <small>Missing</small>
+
+                    <strong>1.4%</strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="model-box">
+
+                <small>
+                    Recommended Model
+                </small>
+
+                <div class="model-name">
+                    XGBoost
+                </div>
+
+                <div class="model-score">
+                    ROC-AUC 0.92
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     DATA ANALYZER
+========================================= -->
+
+<section class="analyzer-section">
+
+    <div class="container">
+
+        <div class="section-label">
+            Featured Platform
+        </div>
+
+        <h2 class="section-title">
+            Analyze your dataset.
+        </h2>
+
+        <p class="section-description">
+
+            Upload your data and let the platform inspect its structure,
+            identify quality issues, explore relationships, visualize
+            patterns, and recommend machine-learning approaches.
+
+        </p>
+
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+
+                <div class="feature-number">
+                    01
+                </div>
+
+                <h3>
+                    Upload
+                </h3>
+
+                <p>
+                    Upload CSV or Excel datasets and immediately preview
+                    their structure.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-number">
+                    02
+                </div>
+
+                <h3>
+                    Clean
+                </h3>
+
+                <p>
+                    Identify missing values, duplicates, data-type issues,
+                    and potential outliers.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-number">
+                    03
+                </div>
+
+                <h3>
+                    Explore
+                </h3>
+
+                <p>
+                    Generate descriptive statistics, correlations,
+                    distributions, and visual insights.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-number">
+                    04
+                </div>
+
+                <h3>
+                    Model
+                </h3>
+
+                <p>
+                    Compare machine-learning algorithms and identify
+                    strong predictive approaches.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="analyzer-action">
+
+            <a
+                href="analyze.html"
+                class="primary-button"
+            >
+                Launch Dataset Analyzer →
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     PROJECTS
+========================================= -->
+
+<section id="projects">
+
+    <div class="container">
+
+        <div class="section-label">
+            Selected Work
+        </div>
+
+        <h2 class="section-title">
+            Projects.
+        </h2>
+
+        <p class="section-description">
+
+            Selected analytics, machine-learning, visualization,
+            and automation projects.
+
+        </p>
+
+
+        <div class="projects-grid">
+
+
+            <a
+                href="fmri-age.html"
+                class="project-card"
+            >
+
+                <div class="project-type">
+                    Machine Learning
+                </div>
+
+                <h3>
+                    fMRI Age Prediction
+                </h3>
+
+                <p>
+                    Machine-learning analysis of neuroimaging data
+                    used to predict participant age.
+                </p>
+
+                <span class="project-link">
+                    View project →
+                </span>
+
+            </a>
+
+
+            <div class="project-card">
+
+                <div class="project-type">
+                    Data Analytics
+                </div>
+
+                <h3>
+                    Utility Analytics
+                </h3>
+
+                <p>
+                    Operational dashboards and analytics workflows
+                    developed from complex utility datasets.
+                </p>
+
+                <span class="project-link">
+                    Case study coming soon
+                </span>
+
+            </div>
+
+
+            <div class="project-card">
+
+                <div class="project-type">
+                    AI + Analytics
+                </div>
+
+                <h3>
+                    Automated Data Analyst
+                </h3>
+
+                <p>
+                    A web-based analytics platform that cleans,
+                    explores, models, and explains uploaded datasets.
+                </p>
+
+                <span class="project-link">
+                    In development
+                </span>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     SKILLS
+========================================= -->
+
+<section class="skills" id="skills">
+
+    <div class="container">
+
+        <div class="section-label">
+            Technology
+        </div>
+
+        <h2 class="section-title">
+            Tools I work with.
+        </h2>
+
+
+        <div class="skills-list">
+
+            <div class="skill">Python</div>
+            <div class="skill">SQL</div>
+            <div class="skill">Pandas</div>
+            <div class="skill">NumPy</div>
+            <div class="skill">Scikit-Learn</div>
+            <div class="skill">XGBoost</div>
+            <div class="skill">Machine Learning</div>
+            <div class="skill">Statistical Analysis</div>
+            <div class="skill">Power BI</div>
+            <div class="skill">Tableau</div>
+            <div class="skill">AWS</div>
+            <div class="skill">Git</div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     ABOUT
+========================================= -->
+
+<section id="about">
+
+    <div class="container about-grid">
+
         <div>
-          <a href="#" class="btn btn-primary">Download Resume</a>
-          <a href="#projects" class="btn btn-ghost">View Projects</a>
+
+            <div class="section-label">
+                About
+            </div>
+
+            <h2 class="section-title">
+                John Barandica.
+            </h2>
+
         </div>
-      </div>
-      <div>
-        <p class="subtitle">
-          Previously with PG&E (data science intern) and currently with the FBI
-          supporting data operations and process optimization.
+
+
+        <div class="about-copy">
+
+            <p>
+
+                I'm a data professional focused on using analytics,
+                machine learning, and automation to solve practical
+                problems.
+
+            </p>
+
+            <p>
+
+                My work combines data exploration, statistical analysis,
+                visualization, predictive modeling, and software
+                development to transform raw information into useful
+                decisions.
+
+            </p>
+
+            <p>
+
+                I'm especially interested in building tools that make
+                sophisticated analytics accessible to people who may not
+                have a technical background.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =========================================
+     CONTACT
+========================================= -->
+
+<section class="contact" id="contact">
+
+    <div class="container">
+
+        <div class="section-label">
+            Contact
+        </div>
+
+        <h2 class="section-title">
+            Let's build something with data.
+        </h2>
+
+        <p class="section-description">
+
+            Interested in analytics, machine learning, data science,
+            or technology opportunities? Let's connect.
+
         </p>
-      </div>
-    </section>
 
-    <section id="projects">
-      <h2 class="section-title">Selected Projects</h2>
-      <div class="projects-grid">
-        <div class="card">
-          <a href="fmri-age.html" class="card" style="display: block; text-decoration: none;">
-  <div class="card-title">fMRI Age Prediction Pipeline</div>
-  <div class="card-meta">Python · PCA · XGBoost</div>
-  <div class="card-body">
-    Built a full ML pipeline to predict participant age from
-    fMRI-derived brain connectivity data with preprocessing and model evaluation.
-  </div>
-</a>
-        <div class="card">
-          <div class="card-title">Utility Dashboards & Automation</div>
-          <div class="card-meta">Power BI · SQL · PG&E</div>
-          <div class="card-body">
-            Developed automated dashboards and ETL workflows to monitor
-            reliability and operational KPIs for utility data systems.
-          </div>
+
+        <div class="contact-buttons">
+
+            <a
+                href="mailto:Johnebarandica@gmail.com"
+                class="primary-button"
+            >
+                Email Me
+            </a>
+
+            <a
+                href="https://github.com/bar07850"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="secondary-button"
+            >
+                GitHub
+            </a>
+
         </div>
-        <div class="card">
-          <div class="card-title">Mission-Ready Data Analysis</div>
-          <div class="card-meta">Databases · Python · FBI</div>
-          <div class="card-body">
-            Cleaned, validated, and analyzed sensitive datasets to improve
-            mission readiness and identify risk patterns.
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section id="skills">
-      <h2 class="section-title">Skills & Tools</h2>
-      <ul class="skills-list">
-        <li>Python (pandas, scikit-learn)</li>
-        <li>SQL</li>
-        <li>Power BI / Tableau</li>
-        <li>Excel & Data Cleaning</li>
-        <li>Machine Learning Pipelines</li>
-        <li>Feature Engineering</li>
-        <li>AWS (basics)</li>
-        <li>Git & GitHub</li>
-        <li>Process Automation</li>
-      </ul>
-    </section>
+    </div>
 
-    <section id="contact">
-      <h2 class="section-title">Let’s Connect</h2>
-      <div class="contact-card">
-        <p>
-          Open to opportunities in data analytics, AI, and technology-driven problem-solving.
-          Feel free to connect or reach out directly.
-        </p>
-        <div class="socials">
-          <a href="mailto:bar07850@gmail.com" class="social-link" target="_blank">Email</a>
-          <a href="https://github.com/bar07850" class="social-link" target="_blank">GitHub</a>
-          <a href="https://www.linkedin.com/in/john-barandica/" class="social-link" target="_blank">LinkedIn</a>
-        </div>
-      </div>
-    </section>
+</section>
 
-    <footer>
-      &copy; <span id="year"></span> John Barandica. Built with HTML & CSS, hosted on GitHub Pages.
-    </footer>
-  </main>
+</main>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer>
+
+    <div class="container footer-content">
+
+        <span>
+            © 2026 John Barandica
+        </span>
+
+        <span>
+            Built with data, code, and curiosity.
+        </span>
+
+    </div>
+
+</footer>
+
+
 </body>
 </html>
