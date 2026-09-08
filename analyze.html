@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analyze My Dataset | John Barandica</title>
+
+    <meta
+        name="description"
+        content="Upload a dataset and inspect its structure, data quality, missing values, duplicates, and analytical potential."
+    >
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: #07111f;
+            color: white;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        .container {
+            width: min(1180px, 92%);
+            margin: auto;
+        }
+
+
+        /* =========================
+           NAVIGATION
+        ========================== */
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(7, 17, 31, 0.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        nav {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .logo span {
+            color: #47b8ff;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: #c5d0dc;
+            font-size: 14px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+        }
+
+
+        /* =========================
+           PAGE HEADER
+        ========================== */
+
+        .page-header {
+            padding: 90px 0 55px;
+        }
+
+        .eyebrow {
+            color: #47b8ff;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: clamp(42px, 6vw, 70px);
+            letter-spacing: -3px;
+            line-height: 1.05;
+            margin-bottom: 20px;
+        }
+
+        .page-header p {
+            max-width: 750px;
+            color: #9faec0;
+            font-size: 18px;
+        }
+
+
+        /* =========================
+           UPLOAD
+        ========================== */
+
+        .upload-area {
+            margin-top: 42px;
+            border: 2px dashed rgba(71,184,255,0.35);
+            border-radius: 18px;
+            background: #0a1625;
+            padding: 60px 25px;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .upload-area.dragover {
+            background: rgba(71,184,255,0.08);
+            border-color: #47b8ff;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(71,184,255,0.12);
+            font-size: 30px;
+        }
+
+        .upload-area h2 {
+            margin-bottom: 10px;
+            font-size: 25px;
+        }
+
+        .upload-area p {
+            color: #8fa0b4;
+            margin-bottom: 25px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-button {
+            display: inline-block;
+            padding: 14px 22px;
+            border-radius: 8px;
+            background: #47b8ff;
+            color: #07111f;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .file-note {
+            display: block;
+            margin-top: 18px;
+            color: #687b91;
+            font-size: 12px;
+        }
+
+
+        /* =========================
+           DATASET STATUS
+        ========================== */
+
+        #results {
+            display: none;
+            padding-bottom: 100px;
+        }
+
+        .dataset-header {
+            margin-top: 45px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .dataset-title h2 {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+
+        .dataset-title p {
+            color: #8395aa;
+        }
+
+        .reset-button {
+            background: transparent;
+            color: #d6e0ea;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 11px 17px;
+            cursor: pointer;
+        }
+
+
+        /* =========================
+           METRICS
+        ========================== */
+
+        .metrics-grid {
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: #0d1b2b;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .metric-card span {
+            display: block;
+            color: #8294a9;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .metric-card strong {
+            font-size: 28px;
+        }
+
+        .good {
+            color: #4ade80;
+        }
+
+        .warning {
+            color: #fbbf24;
+        }
+
+
+        /* =========================
+           SECTIONS
+        ========================== */
+
+        .analysis-section {
+            margin-top: 60px;
+        }
+
+        .section-title {
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .section-description {
+            color: #8497ac;
+            margin-bottom: 24px;
+        }
+
+
+        /* =========================
+           DATA QUALITY
+        ========================== */
+
+        .quality-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .quality-card {
+            background: #0d1b2b;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        .quality-label {
+            color: #8294aa;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .quality-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+
+        /* =========================
+           COLUMN ANALYSIS
+        ========================== */
+
+        .column-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        .column-card {
+            background: #0d1b2b;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .column-name {
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .column-type {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #47b8ff;
+            white-space: nowrap;
+        }
+
+        .column-details {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #8fa1b6;
+        }
+
+
+        /* =========================
+           TABLE
+        ========================== */
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+            background: #0d1b2b;
+        }
+
+        th,
+        td {
+            padding: 13px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #47b8ff;
+            font-weight: 700;
+            background: #0a1726;
+        }
+
+        td {
+            color: #c2cedb;
+        }
+
+
+        /* =========================
+           NEXT STEPS
+        ========================== */
+
+        .next-step {
+            margin-top: 60px;
+            padding: 30px;
+            border-radius: 14px;
+            background: rgba(71,184,255,0.08);
+            border: 1px solid rgba(71,184,255,0.2);
+        }
+
+        .next-step h3 {
+            margin-bottom: 10px;
+        }
+
+        .next-step p {
+            color: #9cafc1;
+        }
+
+
+        /* =========================
+           ERROR
+        ========================== */
+
+        #errorMessage {
+            display: none;
+            margin-top: 20px;
+            padding: 15px 18px;
+            border-radius: 8px;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #fca5a5;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding: 32px 0;
+            color: #718398;
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 900px) {
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quality-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .column-grid {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+        @media (max-width: 600px) {
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links a:not(:last-child) {
+                display: none;
+            }
+
+            .page-header {
+                padding-top: 65px;
+            }
+
+            .upload-area {
+                padding: 45px 20px;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<header>
+
+    <div class="container">
+
+        <nav>
+
+            <a href="index.html" class="logo">
+                JOHN<span>.</span>
+            </a>
+
+            <div class="nav-links">
+
+                <a href="index.html#projects">
+                    Projects
+                </a>
+
+                <a href="index.html#about">
+                    About
+                </a>
+
+                <a href="index.html">
+                    ← Home
+                </a>
+
+            </div>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <section class="page-header">
+
+        <div class="container">
+
+            <div class="eyebrow">
+                Automated Data Analysis
+            </div>
+
+            <h1>
+                Analyze your dataset.
+            </h1>
+
+            <p>
+                Upload a CSV file to inspect its structure, identify
+                potential data-quality problems, understand your variables,
+                and prepare the dataset for deeper statistical and
+                machine-learning analysis.
+            </p>
+
+
+            <!-- UPLOAD -->
+
+            <div class="upload-area" id="uploadArea">
+
+                <div class="upload-icon">
+                    ↑
+                </div>
+
+                <h2>
+                    Upload your dataset
+                </h2>
+
+                <p>
+                    Drag and drop a CSV file here or select one from your computer.
+                </p>
+
+                <label for="fileInput" class="upload-button">
+                    Select CSV File
+                </label>
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept=".csv,text/csv"
+                >
+
+                <span class="file-note">
+                    Your dataset is processed locally in your browser.
+                </span>
+
+            </div>
+
+
+            <div id="errorMessage"></div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- RESULTS -->
+
+    <section id="results">
+
+        <div class="container">
+
+
+            <!-- DATASET NAME -->
+
+            <div class="dataset-header">
+
+                <div class="dataset-title">
+
+                    <h2 id="datasetName">
+                        Dataset
+                    </h2>
+
+                    <p id="datasetFileSize">
+                        Dataset successfully loaded.
+                    </p>
+
+                </div>
+
+                <button
+                    class="reset-button"
+                    id="resetButton"
+                >
+                    Analyze Another Dataset
+                </button>
+
+            </div>
+
+
+
+            <!-- METRICS -->
+
+            <div class="metrics-grid">
+
+                <div class="metric-card">
+
+                    <span>
+                        Rows
+                    </span>
+
+                    <strong id="rowCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <span>
+                        Columns
+                    </span>
+
+                    <strong id="columnCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <span>
+                        Missing Values
+                    </span>
+
+                    <strong id="missingCount">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <span>
+                        Duplicate Rows
+                    </span>
+
+                    <strong id="duplicateCount">
+                        0
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DATA QUALITY -->
+
+            <div class="analysis-section">
+
+                <h2 class="section-title">
+                    Data Quality
+                </h2>
+
+                <p class="section-description">
+                    Initial inspection of the uploaded dataset.
+                </p>
+
+
+                <div class="quality-grid">
+
+                    <div class="quality-card">
+
+                        <div class="quality-label">
+                            Data Health Score
+                        </div>
+
+                        <div
+                            class="quality-value"
+                            id="healthScore"
+                        >
+                            100%
+                        </div>
+
+                    </div>
+
+
+                    <div class="quality-card">
+
+                        <div class="quality-label">
+                            Numeric Columns
+                        </div>
+
+                        <div
+                            class="quality-value"
+                            id="numericColumns"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+                    <div class="quality-card">
+
+                        <div class="quality-label">
+                            Text / Categorical Columns
+                        </div>
+
+                        <div
+                            class="quality-value"
+                            id="textColumns"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- COLUMN ANALYSIS -->
+
+            <div class="analysis-section">
+
+                <h2 class="section-title">
+                    Column Analysis
+                </h2>
+
+                <p class="section-description">
+                    Basic type detection and missing-value inspection.
+                </p>
+
+                <div
+                    class="column-grid"
+                    id="columnAnalysis"
+                >
+                </div>
+
+            </div>
+
+
+
+            <!-- DATA PREVIEW -->
+
+            <div class="analysis-section">
+
+                <h2 class="section-title">
+                    Dataset Preview
+                </h2>
+
+                <p class="section-description">
+                    Showing the first 10 rows.
+                </p>
+
+                <div class="table-wrapper">
+
+                    <table id="previewTable">
+
+                        <thead></thead>
+
+                        <tbody></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FUTURE ANALYSIS -->
+
+            <div class="next-step">
+
+                <h3>
+                    Next Stage: Automated Exploratory Analysis
+                </h3>
+
+                <p>
+                    The next version of this platform will calculate
+                    descriptive statistics, identify outliers, analyze
+                    correlations, visualize distributions, and help determine
+                    which variables are appropriate for machine-learning
+                    analysis.
+                </p>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+</main>
+
+
+
+<footer>
+
+    <div class="container">
+        © 2026 John Barandica • Automated Data Analysis Platform
+    </div>
+
+</footer>
+
+
+
+<script>
+
+    const fileInput =
+        document.getElementById("fileInput");
+
+    const uploadArea =
+        document.getElementById("uploadArea");
+
+    const results =
+        document.getElementById("results");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const resetButton =
+        document.getElementById("resetButton");
+
+
+    /* =========================================
+       FILE SELECTION
+    ========================================= */
+
+    fileInput.addEventListener(
+        "change",
+        function(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (file) {
+                processFile(file);
+            }
+
+        }
+    );
+
+
+    /* =========================================
+       DRAG AND DROP
+    ========================================= */
+
+    uploadArea.addEventListener(
+        "dragover",
+        function(event) {
+
+            event.preventDefault();
+
+            uploadArea.classList.add(
+                "dragover"
+            );
+
+        }
+    );
+
+
+    uploadArea.addEventListener(
+        "dragleave",
+        function() {
+
+            uploadArea.classList.remove(
+                "dragover"
+            );
+
+        }
+    );
+
+
+    uploadArea.addEventListener(
+        "drop",
+        function(event) {
+
+            event.preventDefault();
+
+            uploadArea.classList.remove(
+                "dragover"
+            );
+
+            const file =
+                event.dataTransfer.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            processFile(file);
+
+        }
+    );
+
+
+    /* =========================================
+       PROCESS CSV
+    ========================================= */
+
+    function processFile(file) {
+
+        hideError();
+
+        const extension =
+            file.name
+                .split(".")
+                .pop()
+                .toLowerCase();
+
+
+        if (extension !== "csv") {
+
+            showError(
+                "Please upload a CSV file."
+            );
+
+            return;
+
+        }
+
+
+        Papa.parse(
+            file,
+            {
+
+                header: true,
+
+                skipEmptyLines: true,
+
+                dynamicTyping: false,
+
+                complete: function(resultsData) {
+
+                    if (
+                        resultsData.errors.length > 0 &&
+                        resultsData.data.length === 0
+                    ) {
+
+                        showError(
+                            "The CSV could not be read. Please verify that the file is formatted correctly."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const data =
+                        resultsData.data;
+
+                    const fields =
+                        resultsData.meta.fields || [];
+
+
+                    if (
+                        data.length === 0 ||
+                        fields.length === 0
+                    ) {
+
+                        showError(
+                            "This file does not appear to contain usable tabular data."
+                        );
+
+                        return;
+
+                    }
+
+
+                    analyzeDataset(
+                        file,
+                        data,
+                        fields
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /* =========================================
+       MAIN ANALYSIS
+    ========================================= */
+
+    function analyzeDataset(
+        file,
+        data,
+        fields
+    ) {
+
+        const rowCount =
+            data.length;
+
+        const columnCount =
+            fields.length;
+
+
+        let totalMissing = 0;
+
+        let numericColumnCount = 0;
+
+        let textColumnCount = 0;
+
+
+        const columnStats = [];
+
+
+        fields.forEach(
+            function(field) {
+
+                const values =
+                    data.map(
+                        row => row[field]
+                    );
+
+
+                const nonEmptyValues =
+                    values.filter(
+                        value =>
+                            value !== null &&
+                            value !== undefined &&
+                            String(value).trim() !== ""
+                    );
+
+
+                const missing =
+                    values.length -
+                    nonEmptyValues.length;
+
+
+                totalMissing += missing;
+
+
+                const numericValues =
+                    nonEmptyValues.filter(
+                        value =>
+                            !isNaN(Number(value)) &&
+                            String(value).trim() !== ""
+                    );
+
+
+                const numericRatio =
+                    nonEmptyValues.length === 0
+                        ? 0
+                        : numericValues.length /
+                          nonEmptyValues.length;
+
+
+                const type =
+                    numericRatio >= 0.85
+                        ? "Numeric"
+                        : "Text / Category";
+
+
+                if (type === "Numeric") {
+                    numericColumnCount++;
+                } else {
+                    textColumnCount++;
+                }
+
+
+                const uniqueValues =
+                    new Set(
+                        nonEmptyValues.map(
+                            value =>
+                                String(value)
+                        )
+                    ).size;
+
+
+                columnStats.push(
+                    {
+                        name: field,
+                        type: type,
+                        missing: missing,
+                        unique: uniqueValues
+                    }
+                );
+
+            }
+        );
+
+
+        const duplicateCount =
+            calculateDuplicates(
+                data,
+                fields
+            );
+
+
+        const totalCells =
+            rowCount *
+            columnCount;
+
+
+        const missingRate =
+            totalCells === 0
+                ? 0
+                : totalMissing /
+                  totalCells;
+
+
+        const duplicateRate =
+            rowCount === 0
+                ? 0
+                : duplicateCount /
+                  rowCount;
+
+
+        let healthScore =
+            100 -
+            (
+                missingRate * 60 +
+                duplicateRate * 40
+            ) * 100;
+
+
+        healthScore =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    healthScore
+                )
+            );
+
+
+        updateDashboard(
+            file,
+            rowCount,
+            columnCount,
+            totalMissing,
+            duplicateCount,
+            numericColumnCount,
+            textColumnCount,
+            healthScore,
+            columnStats,
+            data,
+            fields
+        );
+
+    }
+
+
+
+    /* =========================================
+       DUPLICATE DETECTION
+    ========================================= */
+
+    function calculateDuplicates(
+        data,
+        fields
+    ) {
+
+        const seen =
+            new Set();
+
+        let duplicates =
+            0;
+
+
+        data.forEach(
+            function(row) {
+
+                const rowKey =
+                    fields
+                        .map(
+                            field =>
+                                String(
+                                    row[field] ?? ""
+                                )
+                        )
+                        .join("||");
+
+
+                if (
+                    seen.has(rowKey)
+                ) {
+
+                    duplicates++;
+
+                } else {
+
+                    seen.add(rowKey);
+
+                }
+
+            }
+        );
+
+
+        return duplicates;
+
+    }
+
+
+
+    /* =========================================
+       UPDATE UI
+    ========================================= */
+
+    function updateDashboard(
+        file,
+        rowCount,
+        columnCount,
+        missingCount,
+        duplicateCount,
+        numericColumns,
+        textColumns,
+        healthScore,
+        columnStats,
+        data,
+        fields
+    ) {
+
+        document.getElementById(
+            "datasetName"
+        ).textContent =
+            file.name;
+
+
+        document.getElementById(
+            "datasetFileSize"
+        ).textContent =
+            formatFileSize(
+                file.size
+            );
+
+
+        document.getElementById(
+            "rowCount"
+        ).textContent =
+            rowCount.toLocaleString();
+
+
+        document.getElementById(
+            "columnCount"
+        ).textContent =
+            columnCount.toLocaleString();
+
+
+        document.getElementById(
+            "missingCount"
+        ).textContent =
+            missingCount.toLocaleString();
+
+
+        document.getElementById(
+            "duplicateCount"
+        ).textContent =
+            duplicateCount.toLocaleString();
+
+
+        document.getElementById(
+            "numericColumns"
+        ).textContent =
+            numericColumns;
+
+
+        document.getElementById(
+            "textColumns"
+        ).textContent =
+            textColumns;
+
+
+        const healthElement =
+            document.getElementById(
+                "healthScore"
+            );
+
+
+        healthElement.textContent =
+            healthScore.toFixed(0) +
+            "%";
+
+
+        if (
+            healthScore >= 85
+        ) {
+
+            healthElement.className =
+                "quality-value good";
+
+        } else {
+
+            healthElement.className =
+                "quality-value warning";
+
+        }
+
+
+        renderColumnAnalysis(
+            columnStats,
+            rowCount
+        );
+
+
+        renderTable(
+            data,
+            fields
+        );
+
+
+        results.style.display =
+            "block";
+
+
+        results.scrollIntoView(
+            {
+                behavior: "smooth",
+                block: "start"
+            }
+        );
+
+    }
+
+
+
+    /* =========================================
+       COLUMN CARDS
+    ========================================= */
+
+    function renderColumnAnalysis(
+        columns,
+        rowCount
+    ) {
+
+        const container =
+            document.getElementById(
+                "columnAnalysis"
+            );
+
+
+        container.innerHTML =
+            "";
+
+
+        columns.forEach(
+            function(column) {
+
+                const missingPercent =
+                    rowCount === 0
+                        ? 0
+                        : (
+                            column.missing /
+                            rowCount
+                        ) * 100;
+
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "column-card";
+
+
+                card.innerHTML =
+                    `
+                    <div class="column-header">
+
+                        <div class="column-name">
+                            ${escapeHTML(column.name)}
+                        </div>
+
+                        <div class="column-type">
+                            ${escapeHTML(column.type)}
+                        </div>
+
+                    </div>
+
+                    <div class="column-details">
+
+                        Missing:
+                        ${column.missing}
+                        (${missingPercent.toFixed(1)}%)
+
+                        <br>
+
+                        Unique values:
+                        ${column.unique}
+
+                    </div>
+                    `;
+
+
+                container.appendChild(
+                    card
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* =========================================
+       DATA PREVIEW TABLE
+    ========================================= */
+
+    function renderTable(
+        data,
+        fields
+    ) {
+
+        const table =
+            document.getElementById(
+                "previewTable"
+            );
+
+
+        const thead =
+            table.querySelector(
+                "thead"
+            );
+
+
+        const tbody =
+            table.querySelector(
+                "tbody"
+            );
+
+
+        thead.innerHTML =
+            "";
+
+        tbody.innerHTML =
+            "";
+
+
+        const headerRow =
+            document.createElement(
+                "tr"
+            );
+
+
+        fields.forEach(
+            function(field) {
+
+                const th =
+                    document.createElement(
+                        "th"
+                    );
+
+
+                th.textContent =
+                    field;
+
+
+                headerRow.appendChild(
+                    th
+                );
+
+            }
+        );
+
+
+        thead.appendChild(
+            headerRow
+        );
+
+
+        data
+            .slice(0, 10)
+            .forEach(
+                function(row) {
+
+                    const tr =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    fields.forEach(
+                        function(field) {
+
+                            const td =
+                                document.createElement(
+                                    "td"
+                                );
+
+
+                            const value =
+                                row[field];
+
+
+                            td.textContent =
+                                value === null ||
+                                value === undefined ||
+                                value === ""
+                                    ? "—"
+                                    : value;
+
+
+                            tr.appendChild(
+                                td
+                            );
+
+                        }
+                    );
+
+
+                    tbody.appendChild(
+                        tr
+                    );
+
+                }
+            );
+
+    }
+
+
+
+    /* =========================================
+       HELPERS
+    ========================================= */
+
+    function formatFileSize(
+        bytes
+    ) {
+
+        if (
+            bytes < 1024
+        ) {
+
+            return (
+                bytes +
+                " bytes"
+            );
+
+        }
+
+
+        if (
+            bytes <
+            1024 * 1024
+        ) {
+
+            return (
+                (
+                    bytes /
+                    1024
+                ).toFixed(1) +
+                " KB"
+            );
+
+        }
+
+
+        return (
+            (
+                bytes /
+                (
+                    1024 *
+                    1024
+                )
+            ).toFixed(1) +
+            " MB"
+        );
+
+    }
+
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(value)
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+    }
+
+
+    function showError(
+        message
+    ) {
+
+        errorMessage.textContent =
+            message;
+
+        errorMessage.style.display =
+            "block";
+
+    }
+
+
+    function hideError() {
+
+        errorMessage.style.display =
+            "none";
+
+    }
+
+
+
+    /* =========================================
+       RESET
+    ========================================= */
+
+    resetButton.addEventListener(
+        "click",
+        function() {
+
+            fileInput.value =
+                "";
+
+            results.style.display =
+                "none";
+
+            hideError();
+
+            window.scrollTo(
+                {
+                    top: 0,
+                    behavior: "smooth"
+                }
+            );
+
+        }
+    );
+
+</script>
+
+
+</body>
+</html>
