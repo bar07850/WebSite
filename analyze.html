@@ -321,6 +321,22 @@
             display:none;
         }
 
+        /* V4 live model training */
+        .train-panel{margin-top:24px;padding:24px;border-radius:12px;background:rgba(71,184,255,.055);border:1px solid rgba(71,184,255,.18)}
+        .train-panel h3{margin-bottom:8px;font-size:20px}.train-panel p{color:#91a4b9;font-size:13px}
+        .privacy-note{margin-top:14px;padding:13px 15px;border-radius:8px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);color:#9eb0c3;font-size:12px}
+        .train-actions{margin-top:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+        .primary-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+        .training-status{color:#9eb0c3;font-size:13px}.training-status.error{color:#fca5a5}.training-status.success{color:#4ade80}
+        #mlResults{display:none;margin-top:28px}.winner-card{padding:26px;border-radius:14px;background:rgba(71,184,255,.08);border:1px solid rgba(71,184,255,.3)}
+        .winner-eyebrow{color:#47b8ff;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:800}
+        .winner-card h3{font-size:28px;margin:6px 0 4px}.winner-card>p{color:#9eb0c3;font-size:13px}
+        .winner-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+        .winner-metric{padding:15px;border-radius:9px;background:rgba(7,17,31,.55);border:1px solid rgba(255,255,255,.07)}
+        .winner-metric span{display:block;color:#8294aa;font-size:11px;margin-bottom:4px}.winner-metric strong{font-size:19px}
+        .results-meta{margin:18px 0;color:#8497ac;font-size:13px}.dropped-features{margin-top:14px;color:#8294aa;font-size:12px}
+        .dropped-features strong{color:#cbd8e5}.model-results-table td.best-model{color:#4ade80;font-weight:700}.metric-help{color:#687b91;font-size:11px;margin-top:12px}
+
         footer {
             border-top:1px solid rgba(255,255,255,.08);
             padding:32px 0; color:#718398; font-size:13px;
@@ -328,7 +344,7 @@
 
         @media (max-width:900px) {
             .metrics-grid,.quality-grid { grid-template-columns:repeat(2,1fr); }
-            .column-grid,.insight-list,.chart-grid,.stats-grid,.ml-controls,.ml-summary,.model-recommendations { grid-template-columns:1fr; }
+            .column-grid,.insight-list,.chart-grid,.stats-grid,.ml-controls,.ml-summary,.model-recommendations,.winner-metrics { grid-template-columns:1fr; }
         }
         @media (max-width:600px) {
             .metrics-grid,.quality-grid { grid-template-columns:1fr; }
@@ -521,9 +537,23 @@
 
             <div class="model-recommendations" id="modelRecommendations"></div>
 
-            <p class="ml-note">
-                These are candidate models based on the structure of your data. In the next version, the platform will train and cross-validate them so the final recommendation is based on measured performance rather than heuristics.
-            </p>
+            <p class="ml-note">The models above are structural candidates. Run live training below to compare supported models using measured cross-validation performance.</p>
+            <div class="train-panel">
+                <h3>Train &amp; Compare Models</h3>
+                <p>Run predictive modeling for the selected target. The backend preprocesses usable features, performs cross-validation, compares supported models, and recommends the strongest tested model.</p>
+                <div class="privacy-note">Exploratory analysis above runs locally in your browser. Clicking <strong>Train &amp; Compare Models</strong> sends your CSV to the hosted analysis API for model training. Do not upload confidential, regulated, or sensitive personal data.</div>
+                <div class="train-actions"><button class="primary-button" id="trainButton" type="button">Train &amp; Compare Models</button><span class="training-status" id="trainingStatus"></span></div>
+                <div id="mlResults">
+                    <div class="winner-card">
+                        <div class="winner-eyebrow">Recommended Model</div><h3 id="bestModelName">—</h3>
+                        <p id="bestModelReason">Selected from the models tested by the API.</p>
+                        <div class="winner-metrics" id="winnerMetrics"></div><div class="dropped-features" id="droppedFeatures"></div>
+                    </div>
+                    <div class="results-meta" id="modelResultsMeta"></div>
+                    <div class="table-wrapper"><table class="model-results-table"><thead id="modelResultsHead"></thead><tbody id="modelResultsBody"></tbody></table></div>
+                    <p class="metric-help" id="metricHelp"></p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -544,14 +574,7 @@
         </div>
     </div>
 
-    <div class="next-step">
-        <h3>Next Stage: Predictive Modeling</h3>
-        <p>
-            The next version will let the user select a target variable, automatically determine whether
-            the problem is classification or regression, preprocess the data, compare machine-learning
-            algorithms, evaluate their performance, and recommend the strongest model.
-        </p>
-    </div>
+    <div class="next-step"><h3>End-to-End Analytics Workflow</h3><p>This analyzer combines browser-based exploratory analysis with server-side predictive modeling. Model recommendations are based on measured performance from the models actually tested by the API.</p></div>
 
 </div>
 </section>
@@ -573,6 +596,8 @@ let activeCategoryChart = null;
 let currentDataset = null;
 let currentFields = [];
 let currentColumnStats = [];
+let currentFile = null;
+const ML_API_URL = "https://data-analyzer-api-git-320621737202.us-west2.run.app/train";
 
 fileInput.addEventListener("change", e => {
     const file = e.target.files[0];
@@ -597,6 +622,7 @@ uploadArea.addEventListener("drop", e => {
 
 function processFile(file) {
     hideError();
+    currentFile = file;
 
     const extension = file.name.split(".").pop().toLowerCase();
     if (extension !== "csv") {
@@ -1348,6 +1374,52 @@ function analyzeTarget(data, column, rowCount, selectedGoal) {
     }
 }
 
+
+// V4: live Cloud Run model training
+document.getElementById("trainButton").addEventListener("click", trainAndCompareModels);
+
+async function trainAndCompareModels(){
+    const button=document.getElementById("trainButton"), status=document.getElementById("trainingStatus");
+    const target=document.getElementById("targetSelect").value, results=document.getElementById("mlResults");
+    if(!currentFile){status.textContent="Upload a CSV before training.";status.className="training-status error";return;}
+    if(!target){status.textContent="Select a target variable first.";status.className="training-status error";return;}
+    button.disabled=true;button.textContent="Training…";status.textContent="Uploading dataset and running cross-validation…";status.className="training-status";results.style.display="none";
+    const formData=new FormData();formData.append("file",currentFile);formData.append("target",target);
+    try{
+        const response=await fetch(ML_API_URL,{method:"POST",body:formData});
+        let payload=null;try{payload=await response.json();}catch{}
+        if(!response.ok)throw new Error(typeof payload?.detail==="string"?payload.detail:`Training failed (HTTP ${response.status}).`);
+        renderMLResults(payload);status.textContent="Training complete.";status.className="training-status success";results.style.display="block";
+        results.scrollIntoView({behavior:"smooth",block:"nearest"});
+    }catch(error){console.error(error);status.textContent=error.message||"The model training request failed.";status.className="training-status error";}
+    finally{button.disabled=false;button.textContent="Train & Compare Models";}
+}
+
+function renderMLResults(p){
+    const models=Array.isArray(p.models)?p.models:[], best=models.find(m=>m.model===p.best_model)||models[0]||{}, problem=String(p.problem_type||"").toLowerCase();
+    document.getElementById("bestModelName").textContent=p.best_model||"—";
+    document.getElementById("bestModelReason").textContent=`Selected using ${p.selection_metric||"the API selection metric"} across the tested models.`;
+    const wm=document.getElementById("winnerMetrics");wm.innerHTML="";
+    const items=problem==="classification"
+      ?[["F1 Score",pct(best.f1)],["Accuracy",pct(best.accuracy)],["ROC-AUC",num(best.roc_auc)],["CV Stability",best.f1_std==null?"—":`±${pct(best.f1_std)}`]]
+      :[["R²",num(best.r2)],["MAE",num(best.mae)],["RMSE",num(best.rmse)],["CV Stability",best.r2_std==null?"—":`±${num(best.r2_std)}`]];
+    items.forEach(([l,v])=>{const d=document.createElement("div");d.className="winner-metric";const s=document.createElement("span"),b=document.createElement("strong");s.textContent=l;b.textContent=v;d.append(s,b);wm.appendChild(d);});
+    const dropped=Array.isArray(p.dropped_features)?p.dropped_features:[];
+    const df=document.getElementById("droppedFeatures");df.textContent=dropped.length?`Automatically excluded features: ${dropped.join(", ")}`:"Automatically excluded features: None reported";
+    document.getElementById("modelResultsMeta").textContent=`${cap(problem)} • Target: ${p.target||"—"} • ${Number(p.rows_used||0).toLocaleString()} rows • ${Number(p.features_used||0).toLocaleString()} features • Selection metric: ${p.selection_metric||"—"}`;
+    renderModelResultsTable(models,problem,p.best_model);
+    document.getElementById("metricHelp").textContent=problem==="classification"?"Higher Accuracy, Precision, Recall, F1 and ROC-AUC are better.":"Higher R² is better; lower MAE and RMSE are better.";
+}
+function renderModelResultsTable(models,problem,bestModel){
+    const head=document.getElementById("modelResultsHead"),body=document.getElementById("modelResultsBody");head.innerHTML="";body.innerHTML="";
+    const cols=problem==="classification"?[["model","Model"],["accuracy","Accuracy"],["precision","Precision"],["recall","Recall"],["f1","F1"],["roc_auc","ROC-AUC"],["cv_folds","CV Folds"]]:[["model","Model"],["r2","R²"],["mae","MAE"],["rmse","RMSE"],["cv_folds","CV Folds"]];
+    const hr=document.createElement("tr");cols.forEach(([,l])=>{const th=document.createElement("th");th.textContent=l;hr.appendChild(th);});head.appendChild(hr);
+    models.forEach(m=>{const tr=document.createElement("tr");cols.forEach(([k])=>{const td=document.createElement("td");if(k==="model"){td.textContent=m[k]||"—";if(m[k]===bestModel)td.className="best-model";}else if(k==="cv_folds")td.textContent=m[k]??"—";else if(problem==="classification"&&["accuracy","precision","recall","f1"].includes(k))td.textContent=pct(m[k]);else td.textContent=num(m[k]);tr.appendChild(td);});body.appendChild(tr);});
+}
+function pct(v){const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:"—";}
+function num(v){const n=Number(v);return Number.isFinite(n)?n.toFixed(3):"—";}
+function cap(v){return v?v.charAt(0).toUpperCase()+v.slice(1):"—";}
+
 function renderColumnAnalysis(columns, rowCount) {
     const container = document.getElementById("columnAnalysis");
     container.innerHTML = "";
@@ -1480,6 +1552,9 @@ resetButton.addEventListener("click", () => {
     currentDataset = null;
     currentFields = [];
     currentColumnStats = [];
+    currentFile = null;
+    document.getElementById("mlResults").style.display = "none";
+    document.getElementById("trainingStatus").textContent = "";
     destroyHistogram();
     destroyCategoryChart();
     hideError();
