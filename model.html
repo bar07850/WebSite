@@ -11,7 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
-:root{--forest:#1f6b4f;--forest-dark:#164d3a;--sage:#e7f0e8;--cream:#f8f7f2;--ink:#173126;--muted:#6f7f76;--line:#dfe7df;--card:#fff;--danger:#9b3838;--shadow:0 18px 50px rgba(31,71,55,.10)}
+:root{--forest:#1f6b4f;--forest-dark:#164d3a;--sage:#e7f0e8;--cream:#f8f7f2;--ink:#173126;--muted:#6f7f76;--line:#dfe7df;--card:#fff;--danger:#9b3838;--warning:#8a641c;--shadow:0 18px 50px rgba(31,71,55,.10)}
 body{font-family:"Inter",sans-serif;background:linear-gradient(180deg,#fbfbf8,#f5f7f2);color:var(--ink);line-height:1.65}
 a{text-decoration:none;color:inherit}.container{width:min(1120px,92%);margin:auto}
 header{position:sticky;top:0;z-index:1000;background:rgba(251,251,248,.91);backdrop-filter:blur(16px);border-bottom:1px solid rgba(31,107,79,.08)}
@@ -20,22 +20,27 @@ nav{min-height:82px;display:flex;align-items:center;justify-content:space-betwee
 .hero{padding:86px 0 58px;background:radial-gradient(circle at 85% 15%,rgba(76,133,101,.12),transparent 34%)}
 .eyebrow{color:var(--forest);text-transform:uppercase;letter-spacing:2.7px;font-size:12px;font-weight:700;margin-bottom:14px}
 h1,h2,h3{font-family:"DM Serif Display",serif;font-weight:400}h1{font-size:clamp(50px,7vw,78px);line-height:1;letter-spacing:-1.2px;max-width:850px}
-.hero p{margin-top:20px;max-width:760px;color:#56685f;font-size:18px}.trust{margin-top:20px;color:#728279;font-size:13px}
+.hero p{margin-top:20px;max-width:780px;color:#56685f;font-size:18px}.trust{margin-top:20px;color:#728279;font-size:13px}
 main section{padding:56px 0}.panel{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}
 .step-header{display:flex;gap:13px;align-items:center;margin-bottom:18px}.step-badge{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sage);color:var(--forest);font-weight:800;font-size:12px}
 .step-header h2{font-size:31px}.upload-zone{border:1.5px dashed #a9c3b2;border-radius:18px;padding:44px 24px;text-align:center;background:#f8faf7;transition:.2s;cursor:pointer}
 .upload-zone.dragover{background:#edf5ef;border-color:var(--forest)}.upload-icon{font-size:30px;margin-bottom:9px}.upload-zone h3{font-size:26px}.upload-zone p{color:var(--muted);font-size:14px;margin-top:6px}
 button,.button{border:0;font:inherit;cursor:pointer}.primary{display:inline-block;margin-top:18px;background:linear-gradient(180deg,var(--forest),var(--forest-dark));color:#fff;padding:13px 19px;border-radius:11px;font-weight:700}
-.file-meta{margin-top:14px;font-size:13px;color:var(--muted)}
+.primary:disabled{opacity:.55;cursor:not-allowed}.file-meta{margin-top:14px;font-size:13px;color:var(--muted)}
+.dataset-advice{display:none;margin-top:14px;padding:14px 16px;border:1px solid #d9e5dc;border-radius:13px;background:#f8fbf8;color:#50665a;font-size:13px}
+.dataset-advice strong{color:var(--forest)}
 .controls{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}.field select{width:100%;padding:13px;border-radius:11px;border:1px solid #d5e0d7;background:#fbfcfa;color:var(--ink);font:inherit}
-.helper{margin-top:13px;color:var(--muted);font-size:13px}.train-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.status{font-size:13px;color:var(--muted)}.error{margin-top:16px;background:#fff4f4;border:1px solid #efcaca;color:var(--danger);padding:13px 15px;border-radius:10px;display:none}
+.helper{margin-top:13px;color:var(--muted);font-size:13px}.train-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.status{font-size:13px;color:var(--muted)}.error{margin-top:16px;background:#fff4f4;border:1px solid #efcaca;color:var(--danger);padding:13px 15px;border-radius:10px;display:none;white-space:pre-wrap}
+.progress{display:none;margin-top:15px;height:8px;background:#edf1ed;border-radius:99px;overflow:hidden}.progress-bar{height:100%;width:35%;background:var(--forest);border-radius:99px;animation:move 1.2s infinite ease-in-out}
+@keyframes move{0%{transform:translateX(-110%)}100%{transform:translateX(330%)}}
 .results{display:none}.winner{background:linear-gradient(145deg,#edf6ef,#f9fbf8);border:1px solid #cee0d2;border-radius:20px;padding:26px}.winner-label{text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:800;color:var(--forest)}
 .winner h2{font-size:42px;margin-top:4px}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}.metric{background:#fff;border:1px solid #dfe7df;border-radius:14px;padding:16px}.metric span{display:block;font-size:11px;color:var(--muted);margin-bottom:5px}.metric strong{font-size:22px}
 .meta{margin-top:16px;color:var(--muted);font-size:13px}.table-wrap{overflow:auto;margin-top:22px;border:1px solid var(--line);border-radius:14px}table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;padding:13px 14px;border-bottom:1px solid #edf1ed;font-size:13px}th{background:#f3f7f3;color:var(--forest)}
+.optimization{margin-top:22px;border:1px solid var(--line);border-radius:18px;padding:20px;background:#fbfcfa}.optimization h3{font-size:26px}.optimization p{color:var(--muted);font-size:13px;margin-top:4px}.optimization-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:15px}.opt-card{border:1px solid #e1e8e1;background:#fff;border-radius:13px;padding:14px}.opt-card span{display:block;color:var(--muted);font-size:11px}.opt-card strong{display:block;margin-top:3px;font-size:17px}.opt-details{margin-top:12px;color:var(--muted);font-size:12px}
 .explain{margin-top:30px}.explain h3{font-size:29px;margin-bottom:10px}.explain p{color:var(--muted);margin-bottom:10px}.explain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:18px}.explain-card{background:#f8faf7;border:1px solid #e0e8e1;border-radius:15px;padding:18px}.explain-card strong{display:block;margin-bottom:5px}.explain-card span{font-size:13px;color:var(--muted)}
 .privacy{margin-top:18px;background:#f7f8f5;border:1px solid #e1e7df;padding:14px;border-radius:12px;color:#6d7a72;font-size:12px}
 footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f8d85;font-size:13px}
-@media(max-width:800px){.controls,.metric-grid,.explain-grid{grid-template-columns:1fr}.nav-links a:not(.cta){display:none}.panel{padding:22px}}
+@media(max-width:800px){.controls,.metric-grid,.optimization-grid,.explain-grid{grid-template-columns:1fr}.nav-links a:not(.cta){display:none}.panel{padding:22px}}
 </style>
 </head>
 <body>
@@ -48,8 +53,8 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 <section class="hero"><div class="container">
 <div class="eyebrow">No-Code Machine Learning</div>
 <h1>Build and compare predictive models without writing code.</h1>
-<p>Upload a CSV, choose the variable you want to predict, and let the platform handle preprocessing, model training, cross-validation, and performance comparison.</p>
-<div class="trust">Designed for learning, exploration, and non-sensitive datasets. More model controls and export options are coming as the platform develops.</div>
+<p>Upload a CSV, choose the variable you want to predict, and let the platform optimize memory, protect against oversized categorical features, compare models, and validate the winner on unseen data.</p>
+<div class="trust">Large datasets are automatically handled with adaptive model selection. The platform preserves an untouched test set so performance is measured on data the model did not train on.</div>
 </div></section>
 
 <section><div class="container"><div class="panel">
@@ -59,6 +64,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 <label class="primary" for="fileInput">Choose CSV</label><input id="fileInput" type="file" accept=".csv,text/csv" hidden>
 </div>
 <div id="fileMeta" class="file-meta">No dataset loaded.</div>
+<div id="datasetAdvice" class="dataset-advice"></div>
 </div></div></section>
 
 <section><div class="container"><div class="panel">
@@ -73,22 +79,37 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 <section><div class="container"><div class="panel">
 <div class="step-header"><div class="step-badge">3</div><h2>Train & compare models</h2></div>
 <div class="train-wrap"><button id="trainButton" class="primary" disabled>Train Models</button><span id="status" class="status"></span></div>
-<div class="privacy">Exploring the CSV structure happens in your browser. Clicking <strong>Train Models</strong> sends the CSV to the hosted analysis API. Do not upload confidential, regulated, medical, financial-account, or other sensitive personal data.</div>
+<div id="progress" class="progress"><div class="progress-bar"></div></div>
+<div class="privacy">CSV inspection happens in your browser. When possible, the browser <strong>losslessly compresses</strong> the CSV before sending it to the hosted analysis API. Compression does not remove rows, columns, or precision. Do not upload confidential, regulated, medical, financial-account, or other sensitive personal data.</div>
 <div id="errorBox" class="error"></div>
 </div></div></section>
 
 <section id="modelResults" class="results"><div class="container"><div class="panel">
 <div class="step-header"><div class="step-badge">4</div><h2>Review your results</h2></div>
-<div class="winner"><div class="winner-label">Best Performing Tested Model</div><h2 id="winnerName">—</h2><p id="winnerText">Selected using the API's comparison metric.</p><div id="metricGrid" class="metric-grid"></div><div id="resultMeta" class="meta"></div></div>
+<div class="winner">
+<div class="winner-label">Best Performing Tested Model</div>
+<h2 id="winnerName">—</h2>
+<p id="winnerText">Selected using measured cross-validation performance and checked against unseen holdout data.</p>
+<div id="metricGrid" class="metric-grid"></div>
+<div id="resultMeta" class="meta"></div>
+</div>
+
+<div id="optimizationBox" class="optimization">
+<h3>Smart Optimization</h3>
+<p id="optimizationSummary">Optimization details will appear here.</p>
+<div id="optimizationGrid" class="optimization-grid"></div>
+<div id="optimizationDetails" class="opt-details"></div>
+</div>
+
 <div class="table-wrap"><table><thead id="resultHead"></thead><tbody id="resultBody"></tbody></table></div>
 </div></div></section>
 
 <section id="results-explained"><div class="container"><div class="panel explain">
-<div class="eyebrow">Results Explained</div><h3>What do these numbers mean?</h3><p>The platform reports different metrics depending on whether the problem is classification or regression. Higher is not always better for every metric, so context matters.</p>
+<div class="eyebrow">Results Explained</div><h3>What do these numbers mean?</h3><p>The platform reports different metrics depending on whether the problem is classification or regression.</p>
 <div class="explain-grid">
-<div class="explain-card"><strong>Classification</strong><span>Accuracy shows overall correctness. Precision and recall describe different types of classification mistakes. F1 balances precision and recall.</span></div>
-<div class="explain-card"><strong>ROC-AUC</strong><span>For supported binary classification tasks, ROC-AUC measures how well a model separates the two classes across decision thresholds.</span></div>
-<div class="explain-card"><strong>Regression</strong><span>R² describes explained variance, while MAE and RMSE report prediction error. Lower MAE/RMSE is generally better.</span></div>
+<div class="explain-card"><strong>Cross-validation</strong><span>Candidate models are tested across multiple folds. Large datasets use a representative training subset to reduce compute while preserving an untouched holdout set.</span></div>
+<div class="explain-card"><strong>Holdout validation</strong><span>After model comparison, the winning model is retrained on the full training split and evaluated on data that was never used for training or model selection.</span></div>
+<div class="explain-card"><strong>Smart optimization</strong><span>Memory-efficient numeric types, duplicate removal, categorical safeguards, and adaptive sampling reduce compute without changing the original upload.</span></div>
 </div>
 </div></div></section>
 </main>
@@ -97,76 +118,266 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 
 <script>
 const API_URL="https://data-analyzer-api-git-320621737202.us-west2.run.app/train";
+const MODEL_SELECTION_THRESHOLD=30000;
+
 let currentFile=null;
-const fileInput=document.getElementById("fileInput"), uploadZone=document.getElementById("uploadZone"),
-targetSelect=document.getElementById("targetSelect"), trainButton=document.getElementById("trainButton"),
-statusEl=document.getElementById("status"), errorBox=document.getElementById("errorBox");
+let estimatedRows=null;
+
+const fileInput=document.getElementById("fileInput");
+const uploadZone=document.getElementById("uploadZone");
+const targetSelect=document.getElementById("targetSelect");
+const trainButton=document.getElementById("trainButton");
+const statusEl=document.getElementById("status");
+const errorBox=document.getElementById("errorBox");
+const progressEl=document.getElementById("progress");
+const datasetAdvice=document.getElementById("datasetAdvice");
 
 uploadZone.addEventListener("click",e=>{if(e.target.tagName!=="LABEL") fileInput.click()});
 uploadZone.addEventListener("dragover",e=>{e.preventDefault();uploadZone.classList.add("dragover")});
 uploadZone.addEventListener("dragleave",()=>uploadZone.classList.remove("dragover"));
-uploadZone.addEventListener("drop",e=>{e.preventDefault();uploadZone.classList.remove("dragover");if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0])});
+uploadZone.addEventListener("drop",e=>{
+  e.preventDefault();
+  uploadZone.classList.remove("dragover");
+  if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
 fileInput.addEventListener("change",()=>{if(fileInput.files[0]) loadFile(fileInput.files[0])});
+
+function formatBytes(bytes){
+  if(!Number.isFinite(bytes)) return "—";
+  const units=["B","KB","MB","GB"];
+  let i=0,n=bytes;
+  while(n>=1024&&i<units.length-1){n/=1024;i++}
+  return `${n.toFixed(i?1:0)} ${units[i]}`;
+}
 
 function loadFile(file){
   clearError();
   if(!file.name.toLowerCase().endsWith(".csv")) return showError("Please choose a CSV file.");
+
   currentFile=file;
-  Papa.parse(file,{header:true,preview:50,skipEmptyLines:true,complete:r=>{
-    const fields=(r.meta&&r.meta.fields)||[];
-    if(!fields.length) return showError("No columns could be detected in this CSV.");
-    targetSelect.innerHTML="";
-    fields.forEach(f=>{const o=document.createElement("option");o.value=f;o.textContent=f;targetSelect.appendChild(o)});
-    const hints=["target","label","class","outcome","churn","default","fraud","survived","price","sales","revenue","response","status","diagnosis","y"];
-    const preferred=fields.find(f=>hints.includes(f.toLowerCase()));
-    if(preferred) targetSelect.value=preferred;
-    targetSelect.disabled=false;trainButton.disabled=false;
-    document.getElementById("fileMeta").textContent=`${file.name} • ${fields.length} columns • ready for modeling`;
-  },error:()=>showError("The CSV could not be read.")});
+  estimatedRows=null;
+  datasetAdvice.style.display="none";
+
+  // Read the whole CSV only for row estimation when it is reasonably sized.
+  // Papa's worker keeps the UI responsive.
+  Papa.parse(file,{
+    header:true,
+    preview:100,
+    skipEmptyLines:true,
+    worker:true,
+    complete:r=>{
+      const fields=(r.meta&&r.meta.fields)||[];
+      if(!fields.length) return showError("No columns could be detected in this CSV.");
+
+      targetSelect.innerHTML="";
+      fields.forEach(f=>{
+        const o=document.createElement("option");
+        o.value=f;o.textContent=f;targetSelect.appendChild(o);
+      });
+
+      const hints=["target","label","class","outcome","churn","default","fraud","survived","price","sales","revenue","response","status","diagnosis","y"];
+      const preferred=fields.find(f=>hints.includes(f.toLowerCase()));
+      if(preferred) targetSelect.value=preferred;
+
+      targetSelect.disabled=false;
+      trainButton.disabled=false;
+
+      document.getElementById("fileMeta").textContent=
+        `${file.name} • ${fields.length} columns • ${formatBytes(file.size)} • ready for modeling`;
+
+      // Give the user useful behavior information based on file size.
+      if(file.size >= 5*1024*1024){
+        datasetAdvice.innerHTML=
+          `<strong>Large dataset detected.</strong> The upload will be losslessly compressed when supported. The server will compare models on a representative subset if needed, then retrain the winner on the larger training split.`;
+        datasetAdvice.style.display="block";
+      }
+    },
+    error:()=>showError("The CSV could not be read.")
+  });
+}
+
+async function gzipFile(file){
+  if(!("CompressionStream" in window)) return null;
+
+  try{
+    const compressedStream=file.stream().pipeThrough(new CompressionStream("gzip"));
+    const blob=await new Response(compressedStream).blob();
+
+    // Only use gzip when it actually reduces transfer size.
+    if(blob.size >= file.size*0.98) return null;
+    return blob;
+  }catch(_){
+    return null;
+  }
 }
 
 trainButton.addEventListener("click",async()=>{
   if(!currentFile||!targetSelect.value) return;
-  clearError();trainButton.disabled=true;trainButton.textContent="Training…";statusEl.textContent="Uploading dataset and running cross-validation.";
+
+  clearError();
+  trainButton.disabled=true;
+  trainButton.textContent="Training…";
+  statusEl.textContent="Preparing dataset…";
+  progressEl.style.display="block";
+
   try{
-    const fd=new FormData();fd.append("file",currentFile);fd.append("target",targetSelect.value);
-    const res=await fetch(API_URL,{method:"POST",body:fd});
-    const payload=await res.json().catch(()=>({}));
-    if(!res.ok) throw new Error(payload.detail||"The model could not be trained.");
+    const fd=new FormData();
+    const gz=await gzipFile(currentFile);
+
+    if(gz){
+      fd.append("file",gz,currentFile.name+".gz");
+      fd.append("compressed","gzip");
+      fd.append("original_name",currentFile.name);
+      statusEl.textContent=
+        `Compressed ${formatBytes(currentFile.size)} → ${formatBytes(gz.size)}. Uploading and training…`;
+    }else{
+      fd.append("file",currentFile,currentFile.name);
+      fd.append("original_name",currentFile.name);
+      statusEl.textContent="Uploading dataset and running adaptive model comparison…";
+    }
+
+    fd.append("target",targetSelect.value);
+
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(), 14*60*1000);
+
+    let res;
+    try{
+      res=await fetch(API_URL,{method:"POST",body:fd,signal:controller.signal});
+    }finally{
+      clearTimeout(timeout);
+    }
+
+    const contentType=res.headers.get("content-type")||"";
+    let payload={};
+
+    if(contentType.includes("application/json")){
+      payload=await res.json();
+    }else{
+      const text=await res.text();
+      payload={detail:text||`Server returned HTTP ${res.status}.`};
+    }
+
+    if(!res.ok){
+      const detail=payload.detail||payload.message||"The model could not be trained.";
+      throw new Error(`HTTP ${res.status}: ${detail}`);
+    }
+
     renderResults(payload);
-    statusEl.textContent="Training complete.";
+    statusEl.textContent=`Training complete in ${payload.processing_seconds??"—"} seconds.`;
     document.getElementById("modelResults").scrollIntoView({behavior:"smooth",block:"start"});
-  }catch(err){showError(err.message||"Training failed.");statusEl.textContent="";}
-  finally{trainButton.disabled=false;trainButton.textContent="Train Models";}
+
+  }catch(err){
+    if(err.name==="AbortError"){
+      showError("Training timed out in the browser after 14 minutes. The dataset may require a higher-capacity backend configuration.");
+    }else if(err instanceof TypeError){
+      showError("Network request failed. This can indicate a Cloud Run timeout, CORS issue, unavailable service, or connection interruption.");
+    }else{
+      showError(err.message||"Training failed.");
+    }
+    statusEl.textContent="";
+  }finally{
+    progressEl.style.display="none";
+    trainButton.disabled=false;
+    trainButton.textContent="Train Models";
+  }
 });
 
 function renderResults(p){
   document.getElementById("modelResults").style.display="block";
   document.getElementById("winnerName").textContent=p.best_model||"—";
+
   const models=Array.isArray(p.models)?p.models:[];
-  const best=models.find(m=>m.model===p.best_model)||models[0]||{};
   const cls=p.problem_type==="classification";
+  const hold=p.final_test_metrics||{};
+
+  // Primary cards are HOLDOUT metrics so the headline performance is
+  // measured on unseen data, not the same data used for model selection.
   const cards=cls?[
-    ["F1 Score",pct(best.f1)],["Accuracy",pct(best.accuracy)],["ROC-AUC",num(best.roc_auc)],["CV Stability",best.f1_std!=null?"±"+pct(best.f1_std):"—"]
+    ["Holdout F1",pct(hold.f1)],
+    ["Holdout Accuracy",pct(hold.accuracy)],
+    ["Holdout ROC-AUC",num(hold.roc_auc)],
+    ["Holdout Rows",fmtInt(p.holdout_rows)]
   ]:[
-    ["R²",num(best.r2)],["MAE",num(best.mae)],["RMSE",num(best.rmse)],["CV Stability",best.r2_std!=null?"±"+num(best.r2_std):"—"]
+    ["Holdout R²",num(hold.r2)],
+    ["Holdout MAE",num(hold.mae)],
+    ["Holdout RMSE",num(hold.rmse)],
+    ["Holdout Rows",fmtInt(p.holdout_rows)]
   ];
-  document.getElementById("metricGrid").innerHTML=cards.map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
-  document.getElementById("resultMeta").textContent=`Problem: ${cap(p.problem_type)} • Target: ${p.target} • Rows used: ${p.rows_used} • Features used: ${p.features_used} • Selection metric: ${p.selection_metric}`;
-  document.getElementById("winnerText").textContent=`Best-performing model among those tested using ${p.selection_metric||"the selected metric"}.`;
-  const head=cls?["Model","Accuracy","Precision","Recall","F1","ROC-AUC","CV Folds"]:["Model","R²","MAE","RMSE","CV Folds"];
-  document.getElementById("resultHead").innerHTML="<tr>"+head.map(h=>`<th>${h}</th>`).join("")+"</tr>";
-  document.getElementById("resultBody").innerHTML=models.map(m=>cls
-    ?`<tr><td>${m.model}</td><td>${pct(m.accuracy)}</td><td>${pct(m.precision)}</td><td>${pct(m.recall)}</td><td>${pct(m.f1)}</td><td>${num(m.roc_auc)}</td><td>${m.cv_folds??"—"}</td></tr>`
-    :`<tr><td>${m.model}</td><td>${num(m.r2)}</td><td>${num(m.mae)}</td><td>${num(m.rmse)}</td><td>${m.cv_folds??"—"}</td></tr>`
-  ).join("");
+
+  document.getElementById("metricGrid").innerHTML=
+    cards.map(x=>`<div class="metric"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+
+  document.getElementById("resultMeta").textContent=
+    `Problem: ${cap(p.problem_type)} • Target: ${p.target} • Rows used: ${fmtInt(p.rows_used)} • Features used: ${fmtInt(p.features_used)} • Model-selection rows: ${fmtInt(p.model_selection_rows)} • Final training rows: ${fmtInt(p.final_training_rows)}`;
+
+  document.getElementById("winnerText").textContent=
+    `${p.best_model||"The winning model"} was selected using ${p.selection_metric||"cross-validation"} and then retrained before final holdout evaluation.`;
+
+  const head=cls
+    ?["Model","CV Accuracy","CV Precision","CV Recall","CV F1","CV ROC-AUC","Folds"]
+    :["Model","CV R²","CV MAE","CV RMSE","Folds"];
+
+  document.getElementById("resultHead").innerHTML=
+    "<tr>"+head.map(h=>`<th>${h}</th>`).join("")+"</tr>";
+
+  document.getElementById("resultBody").innerHTML=models.map(m=>{
+    if(m.error){
+      return `<tr><td>${escapeHtml(m.model)}</td><td colspan="${head.length-1}">Model skipped: ${escapeHtml(m.error)}</td></tr>`;
+    }
+
+    return cls
+      ?`<tr><td>${escapeHtml(m.model)}</td><td>${pct(m.accuracy)}</td><td>${pct(m.precision)}</td><td>${pct(m.recall)}</td><td>${pct(m.f1)}</td><td>${num(m.roc_auc)}</td><td>${m.cv_folds??"—"}</td></tr>`
+      :`<tr><td>${escapeHtml(m.model)}</td><td>${num(m.r2)}</td><td>${num(m.mae)}</td><td>${num(m.rmse)}</td><td>${m.cv_folds??"—"}</td></tr>`;
+  }).join("");
+
+  renderOptimization(p);
+}
+
+function renderOptimization(p){
+  const o=p.optimization||{};
+  const cards=[
+    ["Memory Before",`${o.memory_before_mb??"—"} MB`],
+    ["Memory After",`${o.memory_after_mb??"—"} MB`],
+    ["Memory Saved",o.memory_reduction_pct!=null?`${o.memory_reduction_pct}%`:"—"],
+    ["Selection Rows",fmtInt(p.model_selection_rows)]
+  ];
+
+  document.getElementById("optimizationGrid").innerHTML=
+    cards.map(x=>`<div class="opt-card"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+
+  const sampling=o.sampling_applied
+    ?`Adaptive sampling was used (${String(o.sampling_method||"representative").replaceAll("_"," ")}). Candidate models were compared on ${fmtInt(p.model_selection_rows)} rows, while the winner was retrained on ${fmtInt(p.final_training_rows)} rows.`
+    :`Sampling was not needed; the available training split was used for model comparison.`;
+
+  document.getElementById("optimizationSummary").textContent=sampling;
+
+  const dropped=[
+    ...(o.dropped_constant_features||[]),
+    ...(o.dropped_identifier_features||[]),
+    ...(o.dropped_free_text_features||[])
+  ];
+
+  const details=[
+    `${fmtInt(o.duplicate_rows_removed||0)} exact duplicate row(s) removed.`,
+    `${fmtInt(o.missing_target_rows_removed||0)} row(s) with a missing target removed.`,
+    `${fmtInt(o.optimized_columns||0)} column(s) memory-optimized.`,
+    `Upload compression: ${p.upload_compression==="gzip"?"gzip (lossless)":"none"}.`,
+    dropped.length?`Excluded unsupported/low-value features: ${dropped.join(", ")}.`:"No predictor columns were excluded by feature safeguards."
+  ];
+
+  document.getElementById("optimizationDetails").textContent=details.join(" ");
 }
 
 function pct(v){return v==null||Number.isNaN(Number(v))?"—":(Number(v)*100).toFixed(1)+"%"}
 function num(v){return v==null||Number.isNaN(Number(v))?"—":Number(v).toFixed(3)}
+function fmtInt(v){return v==null||Number.isNaN(Number(v))?"—":Number(v).toLocaleString()}
 function cap(s){return s?String(s).charAt(0).toUpperCase()+String(s).slice(1):"—"}
 function showError(msg){errorBox.textContent=msg;errorBox.style.display="block"}
 function clearError(){errorBox.textContent="";errorBox.style.display="none"}
+function escapeHtml(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
 </script>
 </body>
 </html>
