@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Build a Machine Learning Model | John Barandica</title>
+<title>AutoML Model Builder | John Barandica</title>
 <meta name="description" content="Upload a CSV, choose a target variable, and compare machine-learning models without writing code.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,8 +53,8 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 <section class="hero"><div class="container">
 <div class="eyebrow">No-Code Machine Learning</div>
 <h1>Build and compare predictive models without writing code.</h1>
-<p>Upload a CSV, choose the variable you want to predict, and let the platform optimize memory, protect against oversized categorical features, compare models, and validate the winner on unseen data.</p>
-<div class="trust">Large datasets are automatically handled with adaptive model selection. The platform preserves an untouched test set so performance is measured on data the model did not train on.</div>
+<p>Upload a CSV and let the AutoML engine engineer useful features, compare advanced algorithms, tune the strongest candidates, test an ensemble, and validate the winner on unseen data.</p>
+<div class="trust">The upgraded engine can use Random Forest, Extra Trees, XGBoost, LightGBM, adaptive hyperparameter tuning, soft-voting ensembles, and threshold optimization while preserving an untouched final test set.</div>
 </div></section>
 
 <section><div class="container"><div class="panel">
@@ -87,7 +87,7 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 <section id="modelResults" class="results"><div class="container"><div class="panel">
 <div class="step-header"><div class="step-badge">4</div><h2>Review your results</h2></div>
 <div class="winner">
-<div class="winner-label">Best Performing Tested Model</div>
+<div class="winner-label">Best Generalizing Tested Model</div>
 <h2 id="winnerName">—</h2>
 <p id="winnerText">Selected using measured cross-validation performance and checked against unseen holdout data.</p>
 <div id="metricGrid" class="metric-grid"></div>
@@ -95,21 +95,34 @@ footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0;color:#7f
 </div>
 
 <div id="optimizationBox" class="optimization">
-<h3>Smart Optimization</h3>
+<h3>AutoML Optimization</h3>
 <p id="optimizationSummary">Optimization details will appear here.</p>
 <div id="optimizationGrid" class="optimization-grid"></div>
 <div id="optimizationDetails" class="opt-details"></div>
 </div>
 
+<div id="trustCenter" class="optimization" style="margin-top:18px">
+<h3>Model Trust Center</h3>
+<p id="trustSummary">Trust diagnostics will appear here.</p>
+<div id="trustGrid" class="optimization-grid"></div>
+<div id="trustDetails" class="opt-details"></div>
+</div>
+
+<div id="eliteDiagnostics" class="optimization" style="margin-top:18px">
+<h3>Elite Model Diagnostics</h3>
+<p id="eliteSummary">Advanced training details will appear here.</p>
+<div id="eliteGrid" class="optimization-grid"></div>
+<div id="eliteDetails" class="opt-details"></div>
+</div>
 <div class="table-wrap"><table><thead id="resultHead"></thead><tbody id="resultBody"></tbody></table></div>
 </div></div></section>
 
 <section id="results-explained"><div class="container"><div class="panel explain">
-<div class="eyebrow">Results Explained</div><h3>What do these numbers mean?</h3><p>The platform reports different metrics depending on whether the problem is classification or regression.</p>
+<div class="eyebrow">Results Explained</div><h3>What do these numbers mean?</h3><p>The platform separates predictive performance from model trust. A very high accuracy score is useful only when the validation design is also trustworthy.</p>
 <div class="explain-grid">
 <div class="explain-card"><strong>Cross-validation</strong><span>Candidate models are tested across multiple folds. Large datasets use a representative training subset to reduce compute while preserving an untouched holdout set.</span></div>
 <div class="explain-card"><strong>Holdout validation</strong><span>After model comparison, the winning model is retrained on the full training split and evaluated on data that was never used for training or model selection.</span></div>
-<div class="explain-card"><strong>Smart optimization</strong><span>Memory-efficient numeric types, duplicate removal, categorical safeguards, and adaptive sampling reduce compute without changing the original upload.</span></div>
+<div class="explain-card"><strong>Smart optimization</strong><span>Memory optimization, automatic feature engineering, advanced boosting models, hyperparameter search, ensembling, threshold tuning, and adaptive sampling improve the chance of stronger generalization.</span></div>
 </div>
 </div></div></section>
 </main>
@@ -233,7 +246,7 @@ trainButton.addEventListener("click",async()=>{
     }else{
       fd.append("file",currentFile,currentFile.name);
       fd.append("original_name",currentFile.name);
-      statusEl.textContent="Uploading dataset and running adaptive model comparison…";
+      statusEl.textContent="Uploading dataset and running advanced AutoML optimization…";
     }
 
     fd.append("target",targetSelect.value);
@@ -327,11 +340,13 @@ function renderResults(p){
     }
 
     return cls
-      ?`<tr><td>${escapeHtml(m.model)}</td><td>${pct(m.accuracy)}</td><td>${pct(m.precision)}</td><td>${pct(m.recall)}</td><td>${pct(m.f1)}</td><td>${num(m.roc_auc)}</td><td>${m.cv_folds??"—"}</td></tr>`
-      :`<tr><td>${escapeHtml(m.model)}</td><td>${num(m.r2)}</td><td>${num(m.mae)}</td><td>${num(m.rmse)}</td><td>${m.cv_folds??"—"}</td></tr>`;
+      ?`<tr><td>${escapeHtml(m.model)}${m.tuned?' ★':''}</td><td>${pct(m.accuracy)}</td><td>${pct(m.precision)}</td><td>${pct(m.recall)}</td><td>${pct(m.f1)}</td><td>${num(m.roc_auc)}</td><td>${m.cv_folds??"—"}</td></tr>`
+      :`<tr><td>${escapeHtml(m.model)}${m.tuned?' ★':''}</td><td>${num(m.r2)}</td><td>${num(m.mae)}</td><td>${num(m.rmse)}</td><td>${m.cv_folds??"—"}</td></tr>`;
   }).join("");
 
   renderOptimization(p);
+  renderTrustCenter(p);
+  renderEliteDiagnostics(p);
 }
 
 function renderOptimization(p){
@@ -367,6 +382,92 @@ function renderOptimization(p){
   ];
 
   document.getElementById("optimizationDetails").textContent=details.join(" ");
+}
+
+
+
+function renderTrustCenter(p){
+  const t=p.trust||{};
+  const findings=Array.isArray(t.leakage_findings)?t.leakage_findings:[];
+  const excluded=Array.isArray(t.automatically_excluded_leakage_features)
+    ?t.automatically_excluded_leakage_features:[];
+
+  const cards=[
+    ["Trust Score",t.score!=null?`${t.score}/100`:"—"],
+    ["Trust Level",t.label||"—"],
+    ["Leakage Warnings",fmtInt(findings.length)],
+    ["Auto-Excluded",fmtInt(excluded.length)]
+  ];
+
+  document.getElementById("trustGrid").innerHTML=
+    cards.map(x=>`<div class="opt-card"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+
+  const details=[];
+
+  if(excluded.length){
+    details.push(`Severe target-proxy features automatically excluded: ${excluded.join(", ")}.`);
+  }
+
+  if(t.possible_group_column){
+    details.push(`Possible repeated-entity column detected: ${t.possible_group_column}. A future group-aware split may be more trustworthy than a random row split.`);
+  }
+
+  if(t.possible_time_column){
+    details.push(`Possible time column detected: ${t.possible_time_column}. Time-aware validation may be more realistic for forecasting or future-event prediction.`);
+  }
+
+  for(const f of findings.slice(0,5)){
+    details.push(`${f.feature}: ${f.reason||"potential leakage risk"}`);
+  }
+
+  if(!details.length){
+    details.push("No major target-proxy, repeated-entity, or obvious temporal leakage warning was detected by the automatic checks.");
+  }
+
+  document.getElementById("trustDetails").textContent=details.join(" ");
+
+  document.getElementById("trustSummary").textContent=
+    `Trust level: ${t.label||"—"}. This score evaluates data-splitting and leakage risk separately from predictive accuracy.`;
+}
+
+function renderEliteDiagnostics(p){
+  const threshold=p.threshold_optimization||null;
+  const engines=p.available_engines||{};
+  const engineered=(p.optimization&&p.optimization.engineered_feature_count)||0;
+  const tunedNames=Object.keys(p.tuning||{}).filter(k=>(p.tuning[k]||{}).tuned);
+
+  const cards=[
+    ["Engine",p.best_model||"—"],
+    ["Features Engineered",fmtInt(engineered)],
+    ["Models Tuned",fmtInt(tunedNames.length)],
+    ["Ensemble",p.ensemble_used?"Selected/Used":"Evaluated or not needed"]
+  ];
+
+  document.getElementById("eliteGrid").innerHTML=
+    cards.map(x=>`<div class="opt-card"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+
+  const details=[];
+  details.push(`Advanced engines: XGBoost ${engines.xgboost?"available":"unavailable"}, LightGBM ${engines.lightgbm?"available":"unavailable"}.`);
+
+  if(tunedNames.length){
+    details.push(`Hyperparameter tuning was run for: ${tunedNames.join(", ")}.`);
+  }
+
+  if(threshold){
+    details.push(`Binary decision threshold was optimized from the default 0.50 to ${threshold.threshold} using out-of-fold predictions only; the final holdout set remained untouched.`);
+  }
+
+  if(p.compression_ratio && p.upload_compression==="gzip"){
+    details.push(`Lossless upload compression ratio: ${Number(p.compression_ratio).toFixed(2)}×.`);
+  }
+
+  details.push(`Total processing time: ${p.processing_seconds??"—"} seconds.`);
+  document.getElementById("eliteDetails").textContent=details.join(" ");
+
+  document.getElementById("eliteSummary").textContent=
+    p.ensemble_used
+      ? "The ensemble achieved the strongest cross-validated ranking and was selected for final training."
+      : "The engine compared advanced candidates, tuned the strongest options, and selected the best generalizing configuration under the compute budget.";
 }
 
 function pct(v){return v==null||Number.isNaN(Number(v))?"—":(Number(v)*100).toFixed(1)+"%"}
